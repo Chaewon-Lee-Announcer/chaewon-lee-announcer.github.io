@@ -1,0 +1,7 @@
+.DS_Store
+# original high-res photos and the user's own archive stay local (not needed by the site)
+/photo/
+/assets/
+# local build caches
+__pycache__/
+onair/src/.fontcache/
