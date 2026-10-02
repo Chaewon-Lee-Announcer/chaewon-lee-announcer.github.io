@@ -702,15 +702,25 @@
         render();
         cleanups.push(() => { sec.classList.remove("h"); cps.forEach((c) => c.classList.remove("hit")); G.set(track, { clearProps: "transform" }); });
       } else {
-        const list = $(".cps", sec);
-        ST.create({ trigger: list, start: "top 65%", end: "bottom 65%", scrub: true, onUpdate: (s) => {
+        // vertical rail: the rail and its progress run from the START dot to the FINISH dot,
+        // and a checkpoint lights up when the progress tip reaches its dot
+        const list = $(".cps", sec), dots = cps.map((cp) => $(".cp-dot", cp));
+        let ys = [], y0 = 0, y1 = 0;
+        const measure = () => {
+          const top = list.getBoundingClientRect().top;
+          ys = dots.map((d) => { const r = d.getBoundingClientRect(); return r.top - top + r.height / 2; });
+          y0 = ys[0]; y1 = ys[ys.length - 1];
+          list.style.setProperty("--y0", y0.toFixed(1) + "px"); list.style.setProperty("--y1", y1.toFixed(1) + "px");
+        };
+        measure();
+        ST.create({ trigger: list, start: () => `top+=${y0} 65%`, end: () => `top+=${y1} 65%`, scrub: true, invalidateOnRefresh: true, onRefreshInit: measure, onUpdate: (s) => {
+          const tip = y0 + (y1 - y0) * s.progress; let name = "START LINE";
           list.style.setProperty("--vp", s.progress.toFixed(4)); kmEl.textContent = (s.progress * 42.195).toFixed(3);
-          let name = "START LINE"; const line = window.innerHeight * 0.65;
-          for (const cp of cps) { if (cp.getBoundingClientRect().top < line && cp.dataset.name) name = cp.dataset.name; }
+          cps.forEach((cp, i) => { const hit = ys[i] <= tip + 1.5; cp.classList.toggle("hit", hit); if (hit && cp.dataset.name) name = cp.dataset.name; });
           nowEl.textContent = name;
         } });
         cps.forEach((cp) => G.from($(".cp-card", cp), { x: 28, autoAlpha: 0, duration: 0.7, ease: "power3.out", scrollTrigger: { trigger: cp, start: "top 90%", once: true } }));
-        cleanups.push(() => list.style.removeProperty("--vp"));
+        cleanups.push(() => { ["--vp", "--y0", "--y1"].forEach((p) => list.style.removeProperty(p)); cps.forEach((c) => c.classList.remove("hit")); });
       }
     })();
 

@@ -37,6 +37,13 @@
 .course-hint{display:none}
 .course:not(.h) .course-hud{position:sticky;top:calc(var(--bar-h) + 8px);z-index:4;width:max-content;max-width:calc(100% - 2 * var(--gutter));margin:0 var(--gutter) 18px;padding:10px 14px;border-radius:999px;background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid var(--line)}
 .course:not(.h) .course-track{padding-inline:var(--gutter);max-width:860px;margin-inline:auto}
+/* vertical rail: dots sit on the rail's centre line; rail and progress span START dot → FINISH dot (--y0/--y1 set by script) */
+.course:not(.h) .cps{--rail:10.5px;--dot:23px;--dot-y:33.5px}
+.course:not(.h) .cps::before,.course:not(.h) .cps::after{left:calc(var(--rail) - 1.5px);top:var(--y0,var(--dot-y))}
+.course:not(.h) .cps::before{bottom:auto;height:calc(var(--y1,100%) - var(--y0,var(--dot-y)))}
+.course:not(.h) .cps::after{height:calc((var(--y1,100%) - var(--y0,var(--dot-y))) * var(--vp,0))}
+.course:not(.h) .cp-dot{box-sizing:border-box;width:var(--dot);height:var(--dot);left:calc(var(--rail) - 34px - var(--dot) / 2);top:calc(var(--dot-y) - var(--dot) / 2);transition:background .3s,transform .3s}
+.course:not(.h) .cp.hit .cp-dot{background:var(--cyc-2);transform:scale(1.15)}
 .course.h .course-hud{margin:0;padding-block:6px 0}
 .course.h .course-hint{display:inline;margin-left:auto;animation:nudge 1.6s ease-in-out infinite}
 @keyframes nudge{50%{transform:translateX(6px)}}

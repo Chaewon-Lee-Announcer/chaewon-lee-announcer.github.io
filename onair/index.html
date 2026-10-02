@@ -689,6 +689,13 @@ section{position:relative}
 .course-hint{display:none}
 .course:not(.h) .course-hud{position:sticky;top:calc(var(--bar-h) + 8px);z-index:4;width:max-content;max-width:calc(100% - 2 * var(--gutter));margin:0 var(--gutter) 18px;padding:10px 14px;border-radius:999px;background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid var(--line)}
 .course:not(.h) .course-track{padding-inline:var(--gutter);max-width:860px;margin-inline:auto}
+/* vertical rail: dots sit on the rail's centre line; rail and progress span START dot → FINISH dot (--y0/--y1 set by script) */
+.course:not(.h) .cps{--rail:10.5px;--dot:23px;--dot-y:33.5px}
+.course:not(.h) .cps::before,.course:not(.h) .cps::after{left:calc(var(--rail) - 1.5px);top:var(--y0,var(--dot-y))}
+.course:not(.h) .cps::before{bottom:auto;height:calc(var(--y1,100%) - var(--y0,var(--dot-y)))}
+.course:not(.h) .cps::after{height:calc((var(--y1,100%) - var(--y0,var(--dot-y))) * var(--vp,0))}
+.course:not(.h) .cp-dot{box-sizing:border-box;width:var(--dot);height:var(--dot);left:calc(var(--rail) - 34px - var(--dot) / 2);top:calc(var(--dot-y) - var(--dot) / 2);transition:background .3s,transform .3s}
+.course:not(.h) .cp.hit .cp-dot{background:var(--cyc-2);transform:scale(1.15)}
 .course.h .course-hud{margin:0;padding-block:6px 0}
 .course.h .course-hint{display:inline;margin-left:auto;animation:nudge 1.6s ease-in-out infinite}
 @keyframes nudge{50%{transform:translateX(6px)}}
@@ -2059,15 +2066,25 @@ html.has-cursor .cursor{display:block}
         render();
         cleanups.push(() => { sec.classList.remove("h"); cps.forEach((c) => c.classList.remove("hit")); G.set(track, { clearProps: "transform" }); });
       } else {
-        const list = $(".cps", sec);
-        ST.create({ trigger: list, start: "top 65%", end: "bottom 65%", scrub: true, onUpdate: (s) => {
+        // vertical rail: the rail and its progress run from the START dot to the FINISH dot,
+        // and a checkpoint lights up when the progress tip reaches its dot
+        const list = $(".cps", sec), dots = cps.map((cp) => $(".cp-dot", cp));
+        let ys = [], y0 = 0, y1 = 0;
+        const measure = () => {
+          const top = list.getBoundingClientRect().top;
+          ys = dots.map((d) => { const r = d.getBoundingClientRect(); return r.top - top + r.height / 2; });
+          y0 = ys[0]; y1 = ys[ys.length - 1];
+          list.style.setProperty("--y0", y0.toFixed(1) + "px"); list.style.setProperty("--y1", y1.toFixed(1) + "px");
+        };
+        measure();
+        ST.create({ trigger: list, start: () => `top+=${y0} 65%`, end: () => `top+=${y1} 65%`, scrub: true, invalidateOnRefresh: true, onRefreshInit: measure, onUpdate: (s) => {
+          const tip = y0 + (y1 - y0) * s.progress; let name = "START LINE";
           list.style.setProperty("--vp", s.progress.toFixed(4)); kmEl.textContent = (s.progress * 42.195).toFixed(3);
-          let name = "START LINE"; const line = window.innerHeight * 0.65;
-          for (const cp of cps) { if (cp.getBoundingClientRect().top < line && cp.dataset.name) name = cp.dataset.name; }
+          cps.forEach((cp, i) => { const hit = ys[i] <= tip + 1.5; cp.classList.toggle("hit", hit); if (hit && cp.dataset.name) name = cp.dataset.name; });
           nowEl.textContent = name;
         } });
         cps.forEach((cp) => G.from($(".cp-card", cp), { x: 28, autoAlpha: 0, duration: 0.7, ease: "power3.out", scrollTrigger: { trigger: cp, start: "top 90%", once: true } }));
-        cleanups.push(() => list.style.removeProperty("--vp"));
+        cleanups.push(() => { ["--vp", "--y0", "--y1"].forEach((p) => list.style.removeProperty(p)); cps.forEach((c) => c.classList.remove("hit")); });
       }
     })();
 
