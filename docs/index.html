@@ -329,7 +329,7 @@ section{position:relative}
 .ident--live .ident-title .alt{color:var(--cyc-2)}
 .ident-sub{margin:0;font:800 clamp(20px,2.6vw,38px)/1.25 var(--f-ko);text-wrap:balance;max-width:24ch}
 .ident-sub mark{background:linear-gradient(var(--butter),var(--butter)) no-repeat 0 50%/100% 100%;color:var(--hi-ink);padding-inline:.12em;border-radius:3px}
-.ident--live .ident-sub mark{background:linear-gradient(var(--cyc-2),var(--cyc-2)) no-repeat 0 100%/100% .09em;padding-bottom:.1em;color:inherit}
+.ident--live .ident-sub mark{background:linear-gradient(var(--cyc-2),var(--cyc-2)) no-repeat 0 92%/100% 34%;color:inherit;padding-inline:.08em;border-radius:0}
 
 /* ───────── COURSE (sports MC) ───────── */
 .course{background:var(--paper)}
@@ -2045,10 +2045,10 @@ html.has-cursor .cursor{display:block}
           svg.setAttribute("width", W); svg.setAttribute("height", H); svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
           const pts = [{ x: 0, y: mid }]; centers = [];
           cps.forEach((cp, i) => {
-            const x = cp.offsetLeft + cp.offsetWidth / 2, y = mid + Math.sin(i * 1.2) * H * 0.075;
+            const x = cp.offsetParent === track ? cp.offsetLeft + cp.offsetWidth / 2 : cp.offsetParent.offsetLeft + cp.offsetLeft + cp.offsetWidth / 2, y = mid + Math.sin(i * 1.2) * H * 0.075;
             cp.style.setProperty("--y", y.toFixed(1) + "px"); pts.push({ x, y }); centers.push({ x, cp });
           });
-          pts.push({ x: W, y: mid });
+          // the route ends on the FINISH checkpoint (no tail past it)
           let d = `M${pts[0].x},${pts[0].y}`;
           for (let i = 0; i < pts.length - 1; i++) {
             const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
@@ -2061,12 +2061,16 @@ html.has-cursor .cursor{display:block}
         const lenAtX = (x) => { let lo = 0, hi = lut.length - 1; while (lo < hi) { const m = (lo + hi) >> 1; if (lut[m] < x) lo = m + 1; else hi = m; } return (len * lo) / (lut.length - 1); };
         const dist = () => Math.max(0, track.scrollWidth - window.innerWidth);
         const render = () => {
-          const cx = -G.getProperty(track, "x") + window.innerWidth * 0.5;
-          const l = lenAtX(cx); path.style.strokeDashoffset = len - l;
+          // the "you are here" point travels from screen-centre at the start to the FINISH dot at the end of the pin,
+          // so the last checkpoint is always reached and the counter lands on exactly 42.195
+          const d = dist(), tr = d ? Math.min(1, Math.max(0, -G.getProperty(track, "x") / d)) : 1, t = tr > 0.995 ? 1 : tr;
+          const c0 = window.innerWidth * 0.5, c1 = centers.length ? centers[centers.length - 1].x : c0;
+          const cx = c0 + (c1 - c0) * t;
+          const l = t >= 1 ? len : lenAtX(cx); path.style.strokeDashoffset = len - l;
           const p = path.getPointAtLength(l); G.set(runner, { x: p.x, y: p.y });
           const km = (l / len) * 42.195; kmEl.textContent = km.toFixed(3); runner.dataset.km = km.toFixed(1) + " KM";
           let name = "START LINE";
-          for (const c of centers) { const hit = c.x <= cx + 2; c.cp.classList.toggle("hit", hit); if (hit && c.cp.dataset.name) name = c.cp.dataset.name; }
+          for (const c of centers) { const hit = c.x <= cx + 2 || t >= 1; c.cp.classList.toggle("hit", hit); if (hit && c.cp.dataset.name) name = c.cp.dataset.name; }
           nowEl.textContent = name;
         };
         build();

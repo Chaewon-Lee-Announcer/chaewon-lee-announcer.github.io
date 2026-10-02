@@ -285,7 +285,7 @@ section{position:relative}
 .ident--live .ident-title .alt{color:var(--cyc-2)}
 .ident-sub{margin:0;font:800 clamp(20px,2.6vw,38px)/1.25 var(--f-ko);text-wrap:balance;max-width:24ch}
 .ident-sub mark{background:linear-gradient(var(--butter),var(--butter)) no-repeat 0 50%/100% 100%;color:var(--hi-ink);padding-inline:.12em;border-radius:3px}
-.ident--live .ident-sub mark{background:linear-gradient(var(--cyc-2),var(--cyc-2)) no-repeat 0 100%/100% .09em;padding-bottom:.1em;color:inherit}
+.ident--live .ident-sub mark{background:linear-gradient(var(--cyc-2),var(--cyc-2)) no-repeat 0 92%/100% 34%;color:inherit;padding-inline:.08em;border-radius:0}
 
 /* ───────── COURSE (sports MC) ───────── */
 .course{background:var(--paper)}
