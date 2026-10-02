@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>이채원 ON AIR · Shorts</title>
+<style>
+/*FONTS*/
+:root{--pink:#FE8AAD;--pink2:#E9587F;--pinkhi:#FFD0DE;--navy:#34497A;--tally:#FF2D4B;--butter:#FFE7A1;--ink:#121A2E;--dev:#0B1020;--ok:#27D17C;
+  --f:"Pretendard Variable",Pretendard,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000;overflow:hidden}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;font-family:var(--f);color:#fff;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+#screen{position:absolute;inset:0;transform-origin:540px 960px}
+.scene{position:absolute;inset:0;overflow:hidden;visibility:hidden;transform-origin:0 0}
+.abs{position:absolute}
+.mono{font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.ch{display:inline-block;overflow:hidden;vertical-align:top;padding:.1em .02em;margin:-.1em -.02em}
+.ci{display:inline-block}
+.dot{display:inline-block;width:.55em;height:.55em;border-radius:50%;background:currentColor;flex:none}
+svg{display:block;width:100%;height:100%}
+
+/* ── 0 · bars + slate ── */
+#barRows{inset:0;display:grid;grid-template-rows:67fr 8fr 25fr}
+#barRows .row{display:flex}
+#barRows i{display:block;height:100%}
+#sync{left:0;right:0;top:0;height:170px;background:linear-gradient(transparent,rgba(0,0,0,.3) 45%,rgba(255,255,255,.1) 60%,transparent)}
+#slate{left:96px;right:96px;top:560px;filter:drop-shadow(0 40px 60px rgba(0,0,0,.55))}
+#slate .stick,#slate .base{height:74px;background:repeating-linear-gradient(-58deg,#0E1220 0 46px,#F4F4F4 46px 92px);border:4px solid #0E1220}
+#slate .stick{border-radius:10px 10px 0 0;transform-origin:0 100%}
+#slate .base{border-radius:0}
+#slate .board{background:#0E1220;border:4px solid #0E1220;border-top:0;border-radius:0 0 14px 14px;padding:34px 44px 40px;display:grid;gap:22px}
+#slate .r{display:flex;justify-content:space-between;align-items:baseline;gap:20px;padding-bottom:16px;border-bottom:2px solid rgba(255,255,255,.14)}
+#slate .r:last-child{border:0;padding:0}
+#slate .r span{font-size:24px;color:rgba(255,255,255,.5)}
+#slate .r b{font-size:44px;font-weight:800;letter-spacing:-.01em}
+#slate .r b.y{color:var(--butter)}
+
+/* ── 0b · leader ── */
+#leader{background:radial-gradient(circle at 50% 50%,#5C5C5C 0,#2C2C2C 56%,#0F0F0F 100%)}
+#ring{left:110px;top:530px;width:860px;height:860px}
+#sweep{position:absolute;inset:0;border-radius:50%}
+#ring .r1{position:absolute;inset:0;border-radius:50%;border:14px solid #EDEDED}
+#ring .r2{position:absolute;inset:12%;border-radius:50%;border:5px solid rgba(255,255,255,.55)}
+#ring .hx,#ring .vx{position:absolute;background:rgba(255,255,255,.5)}
+#ring .hx{left:-14%;right:-14%;top:50%;height:5px;margin-top:-2.5px}
+#ring .vx{top:-14%;bottom:-14%;left:50%;width:5px;margin-left:-2.5px}
+#num{position:absolute;inset:0;display:grid;place-items:center;font-size:600px;font-weight:900;line-height:1;color:#F4F4F4;text-shadow:0 0 50px rgba(0,0,0,.4);padding-bottom:30px}
+#dust{left:0;top:0;width:1080px;height:1920px}
+#leader .lbl{left:0;right:0;top:1460px;text-align:center;font-size:30px;color:rgba(255,255,255,.6)}
+
+/* ── 1 · on air slam ── */
+#slam{background:var(--tally)}
+#rays{left:-460px;top:-360px;width:2000px;height:2000px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.17) 0deg 4deg,transparent 4deg 12deg);-webkit-mask:radial-gradient(circle,transparent 0 9%,#000 26%,transparent 68%);mask:radial-gradient(circle,transparent 0 9%,#000 26%,transparent 68%)}
+.wave{left:340px;top:440px;width:400px;height:400px;border-radius:50%;border:10px solid rgba(255,255,255,.9)}
+#lamp{left:465px;top:565px;width:150px;height:150px;border-radius:50%;background:#fff;box-shadow:0 0 60px 20px rgba(255,255,255,.8),0 0 240px 100px rgba(255,214,224,.5)}
+#slamWord{left:0;right:0;top:810px;text-align:center;font-size:262px;font-weight:900;letter-spacing:-.045em;line-height:1;white-space:nowrap}
+#slamSub{left:0;right:0;top:1110px;text-align:center;font-size:46px}
+
+/* ── 2 · hero ── */
+#hero{background:var(--pink)}
+#heroCam{position:absolute;inset:0;transform-origin:781px 720px}
+#heroBg{position:absolute;inset:0;background:radial-gradient(70% 45% at 78% 20%,var(--pinkhi),transparent 70%),radial-gradient(90% 60% at 0% 100%,var(--pink2),transparent 62%),var(--pink)}
+#glow{left:-260px;top:-240px;width:1400px;height:1400px;border-radius:50%;background:radial-gradient(circle,rgba(255,240,246,.62),rgba(255,240,246,0) 62%)}
+#beam{left:0;top:-500px;width:300px;height:3000px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)}
+#word{left:0;right:0;top:280px;display:grid;justify-items:center;font-size:360px;line-height:.84;letter-spacing:-.06em;color:var(--navy);font-weight:900}
+#word .ln{width:max-content}
+#figWrap{left:582px;top:480px;width:458px;height:1500px;transform-origin:50% 100%}
+#fig{width:100%;height:100%;display:block;object-fit:contain;filter:drop-shadow(-30px 24px 36px rgba(150,28,72,.3))}
+#heroGfx{position:absolute;inset:0}
+#kicker{left:56px;top:974px;padding:14px 22px;border-radius:999px;background:#fff;color:var(--navy);font-size:24px;display:flex;align-items:center;gap:12px;white-space:nowrap;box-shadow:0 14px 30px rgba(52,73,122,.2)}
+#kicker .dot{color:var(--tally);font-size:24px}
+#name{left:44px;top:1030px;font-size:204px;font-weight:900;line-height:1.05;color:#fff;-webkit-text-stroke:16px var(--navy);paint-order:stroke fill;text-shadow:12px 12px 0 var(--navy);white-space:nowrap;letter-spacing:-.02em}
+#nameEn{left:62px;top:1262px;font-size:40px;font-weight:800;letter-spacing:.22em;color:var(--navy);white-space:nowrap}
+#lt{left:56px;top:1330px;display:flex;filter:drop-shadow(0 18px 30px rgba(52,73,122,.32))}
+#lt .tag{display:flex;align-items:center;gap:12px;padding:0 24px;background:var(--navy);font-size:24px;height:88px;transform-origin:0 50%}
+#lt .tag .dot{color:var(--tally);font-size:22px}
+#lt .main{display:flex;align-items:center;gap:22px;padding:0 28px;background:#fff;color:var(--navy);height:88px}
+#lt .main b{font-size:46px;font-weight:900;white-space:nowrap}
+#lt .rwin{height:88px;overflow:hidden;border-left:4px solid var(--pink);padding-left:22px;width:420px}
+#lt .roles{display:flex;flex-direction:column}
+#lt .role{height:88px;display:flex;align-items:center;font-size:34px;font-weight:700;white-space:nowrap}
+#vf{left:36px;right:36px;top:172px;bottom:400px}
+#vf .c{position:absolute;width:74px;height:74px;border:6px solid #fff}
+#vf .tl{top:0;left:0;border-right:0;border-bottom:0}#vf .tr{top:0;right:0;border-left:0;border-bottom:0}
+#vf .bl{bottom:0;left:0;border-right:0;border-top:0}#vf .br{bottom:0;right:0;border-left:0;border-top:0}
+#vf .rec{left:30px;top:28px;display:flex;align-items:center;gap:14px;font-size:28px;text-shadow:0 2px 10px rgba(0,0,0,.25)}
+#vf .rec .dot{color:var(--tally);font-size:36px}
+#vf .spec{right:30px;top:32px;font-size:22px;text-shadow:0 2px 10px rgba(0,0,0,.25)}
+#vf .meter{left:30px;top:80px;display:grid;gap:7px}
+#vf .meter i{display:block;width:240px;height:9px;border-radius:5px;background:linear-gradient(90deg,var(--ok) 0 62%,var(--butter) 62% 84%,var(--tally) 84%);transform-origin:0 50%}
+#vf .cross{left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px}
+#vf .cross::before,#vf .cross::after{content:"";position:absolute;background:rgba(255,255,255,.8)}
+#vf .cross::before{left:0;right:0;top:50%;height:3px;margin-top:-1.5px}
+#vf .cross::after{top:0;bottom:0;left:50%;width:3px;margin-left:-1.5px}
+#af{left:0;top:0;width:200px;height:200px;color:#fff;visibility:hidden}
+#af .k{position:absolute;width:36px;height:36px;border:5px solid currentColor}
+#af .k1{left:0;top:0;border-right:0;border-bottom:0}#af .k2{right:0;top:0;border-left:0;border-bottom:0}
+#af .k3{left:0;bottom:0;border-right:0;border-top:0}#af .k4{right:0;bottom:0;border-left:0;border-top:0}
+#af b{position:absolute;left:0;top:calc(100% + 12px);font-size:24px;letter-spacing:.16em;white-space:nowrap;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+
+/* ── statics ── */
+.static{background:#111}
+.static .noise{left:0;top:0;width:1080px;height:1920px;image-rendering:pixelated}
+.static .lines{inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 3px,transparent 3px 6px)}
+.static .osd{right:64px;top:236px;text-align:right;color:#fff;text-shadow:6px 6px 0 #000,0 0 26px rgba(0,0,0,.6)}
+.static .osd b{display:block;font-size:150px;font-weight:800;line-height:1;letter-spacing:.02em}
+.static .osd small{display:block;margin-top:14px;font-size:44px}
+
+/* ── 3 · sports ── */
+#sportsT{background:var(--dev)}
+#sportsTIn{position:absolute;inset:0;transform-origin:540px 860px}
+#sportsT .stripes{left:-700px;top:0;width:2600px;height:1920px;background:repeating-linear-gradient(-60deg,rgba(255,255,255,.04) 0 46px,transparent 46px 120px)}
+#sportsT .bignum{right:-50px;top:110px;font-size:820px;font-weight:900;line-height:.8;color:transparent;-webkit-text-stroke:4px rgba(254,138,173,.2);letter-spacing:-.06em}
+.chipRow{left:0;right:0;top:500px;display:flex;justify-content:center}
+.chip{padding:16px 26px;border-radius:999px;border:3px solid currentColor;font-size:26px;display:flex;align-items:center;gap:14px;white-space:nowrap}
+.chip .dot{color:var(--tally);font-size:24px}
+.ttl{left:0;right:0;top:600px;display:grid;justify-items:center;font-weight:900;line-height:.88;letter-spacing:-.05em}
+.ttl .ln{width:max-content;white-space:nowrap}
+#sportsT .ttl .alt{color:var(--pink)}
+.tsub{left:70px;right:70px;top:1010px;text-align:center;font-size:58px;font-weight:800;line-height:1.34;letter-spacing:-.02em}
+.tsub .sl{overflow:hidden;padding:0 .1em}
+.tsub .sl>span{display:inline-block}
+#sportsT .tsub mark{background:linear-gradient(var(--butter),var(--butter)) no-repeat 0 90%/var(--hl,0%) 28%;color:inherit;padding:0 .06em}
+#sportsT .tmeta{left:0;right:0;top:1214px;text-align:center;font-size:26px;color:#9AA4C0}
+#sportsM{background:var(--dev)}
+#checker{left:-720px;top:-500px;width:2520px;height:2920px;background:repeating-conic-gradient(#18224A 0 25%,#0B1020 0 50%) 0 0/128px 128px}
+.card{border-radius:24px;overflow:hidden;background:#000;box-shadow:0 50px 90px -30px rgba(0,0,0,.85),0 0 0 7px #fff}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.cap{position:absolute;left:20px;bottom:20px;display:flex;align-items:center;gap:12px;padding:12px 18px;border-radius:999px;background:rgba(11,16,32,.88);font-size:27px;white-space:nowrap}
+.cap b{font-weight:800}
+.cap span{font-size:20px;color:var(--butter)}
+#c1{left:50px;top:210px;width:980px;height:735px}
+#c2{left:30px;top:690px;width:600px;height:400px}
+#c3{left:670px;top:640px;width:360px;height:540px}
+#c3 img{object-position:50% 30%}
+#counter{left:56px;right:56px;top:1214px;padding:30px 36px;border-radius:28px;background:rgba(11,16,32,.96);border:2px solid rgba(255,255,255,.14);display:flex;align-items:center;gap:26px;box-shadow:0 30px 60px rgba(0,0,0,.5)}
+#counter .odo{display:flex;align-items:baseline;font-size:138px;font-weight:800;line-height:1;color:var(--butter);text-shadow:0 0 40px rgba(255,214,102,.45);letter-spacing:-.02em;flex:none}
+#counter .col{display:inline-block;height:1em;overflow:hidden}
+#counter .strip{display:flex;flex-direction:column}
+#counter .strip span{height:1em;line-height:1;text-align:center}
+#counter .unit{font-size:52px;margin-left:8px}
+#counter .cl p{font-size:33px;font-weight:800;line-height:1.25}
+#counter .cl small{display:block;margin-top:10px;font-size:21px;line-height:1.35;color:#9AA4C0;font-weight:600}
+#ticker{left:0;right:0;top:1446px;height:70px;display:flex;align-items:center;background:var(--tally);overflow:hidden}
+#ticker .lab{flex:none;height:100%;display:flex;align-items:center;padding:0 24px;background:#fff;color:var(--tally);font-size:26px;position:relative;z-index:1}
+#ticker .trk{display:flex;gap:36px;padding-left:36px;white-space:nowrap;font-size:30px;font-weight:800}
+#ticker .trk b{color:rgba(255,255,255,.6);font-weight:800}
+
+/* ── 4 · live commerce ── */
+#liveT{background:linear-gradient(165deg,#FFE3EC 0%,#FFD0DF 42%,#CFE6F8 100%);color:var(--ink)}
+#bokeh i{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.8),rgba(255,255,255,0) 70%)}
+#liveT .chip{color:var(--ink)}
+#liveT .ttl .ln:first-child{color:var(--tally)}
+#liveT .ttl .alt{color:var(--navy)}
+#liveT .tsub{top:1050px}
+#liveT .tsub mark{background:linear-gradient(var(--pink),var(--pink)) no-repeat 0 90%/var(--hl,0%) 30%;color:inherit;padding:0 .06em}
+#liveW{background:#070A14}
+#wall{left:60px;top:168px;width:960px;height:1668px;transform-origin:0 0}
+.tile{position:absolute;width:228px;height:405px;border-radius:10px;background:#151B2E}
+.tile .scr{position:absolute;inset:0;border-radius:10px;overflow:hidden}
+.tile img{width:100%;height:100%;object-fit:cover;display:block}
+.tile .lbl{position:absolute;left:8px;bottom:8px;max-width:calc(100% - 16px);padding:5px 8px;border-radius:4px;background:rgba(0,0,0,.62);font-size:15px;font-weight:700;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .tl{position:absolute;inset:-8px;border-radius:15px;border:6px solid transparent}
+.tile .tg{position:absolute;right:8px;top:8px;padding:4px 8px;border-radius:4px;font-size:15px;font-weight:800;letter-spacing:.1em;display:none}
+.tile.pvw .tl{border-color:var(--ok)}
+.tile.pgm .tl{border-color:var(--tally);box-shadow:0 0 40px rgba(255,45,75,.6)}
+.tile.pvw .tg{display:block;background:var(--ok);color:#052012}
+.tile.pgm .tg{display:block;background:var(--tally)}
+.tile.pvw .tg::after{content:"PVW"}
+.tile.pgm .tg::after{content:"PGM"}
+#zoomUi{inset:0}
+#zoomUi .badge{left:56px;top:204px;display:flex;gap:10px}
+#zoomUi .badge span{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:8px;background:rgba(0,0,0,.6);font-size:28px}
+#zoomUi .badge .rp{background:var(--tally)}
+#zoomUi .brand{left:56px;right:170px;top:1190px;padding:26px 30px;border-radius:22px;background:rgba(255,255,255,.96);color:var(--ink);box-shadow:0 24px 60px rgba(0,0,0,.35)}
+#zoomUi .brand b{display:block;font-size:50px;font-weight:900;letter-spacing:-.02em}
+#zoomUi .brand span{display:block;margin-top:6px;font-size:28px;font-weight:600;color:#4B566F}
+.hrt{position:absolute;left:0;top:0;width:64px;height:58px;visibility:hidden}
+
+/* ── 5 · prompter ── */
+#prompt{background:#05070E}
+#prompt .glare{inset:0;background:linear-gradient(115deg,rgba(255,255,255,.06) 0 20%,transparent 20% 42%,rgba(255,255,255,.035) 42% 46%,transparent 46%)}
+#prompt .top{left:64px;right:64px;top:204px;display:flex;justify-content:space-between;align-items:center;font-size:26px;color:#8A94AE}
+#prompt .top span{display:flex;align-items:center;gap:12px}
+#prompt .top .dot{color:var(--tally)}
+#plines{left:100px;right:40px;top:0}
+.pl{height:200px;display:flex;align-items:center;font-size:126px;font-weight:900;letter-spacing:-.04em;color:#3A4155;white-space:nowrap;transform-origin:0 50%}
+.pl mark{background:linear-gradient(var(--butter),var(--butter)) no-repeat 0 88%/var(--hl,0%) 26%;color:inherit;padding:0 .04em}
+#prompt .cue{top:960px;width:0;height:0;margin-top:-26px;border-top:26px solid transparent;border-bottom:26px solid transparent}
+#prompt .cue.l{left:30px;border-left:38px solid var(--tally)}
+#prompt .cue.r{right:30px;border-right:38px solid var(--tally)}
+#prompt .motto{left:0;right:0;top:1330px;text-align:center;font-size:56px;font-weight:300;color:var(--pink)}
+#prompt .pbar{left:64px;right:64px;top:1446px;height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+#prompt .pbar i{display:block;height:100%;width:100%;background:var(--tally);transform-origin:0 50%}
+
+/* ── 6 · end card ── */
+#shutter i{position:absolute;left:0;width:1080px;height:192px;background:var(--pink)}
+#endBg{inset:0;background:radial-gradient(70% 45% at 70% 12%,var(--pinkhi),transparent 70%),radial-gradient(90% 60% at 0% 100%,var(--pink2),transparent 62%),var(--pink);opacity:0}
+#passWrap{left:150px;top:60px;width:780px;height:1000px;transform-origin:390px -600px}
+#lanyard{left:361px;top:-640px;width:58px;height:968px;background:var(--navy);overflow:hidden;display:grid;place-items:end center;padding-bottom:40px}
+#lanyard span{writing-mode:vertical-rl;font-size:20px;letter-spacing:.3em;white-space:nowrap;color:#fff}
+#clip{left:336px;top:300px;width:108px;height:48px;border-radius:12px;background:#C9CED9;box-shadow:inset 0 -6px 0 rgba(0,0,0,.15)}
+#pass{left:0;top:330px;width:780px;border-radius:40px;background:#F9FAFC;color:var(--ink);overflow:hidden;box-shadow:0 60px 110px -40px rgba(52,73,122,.65)}
+#pass .hd{display:flex;justify-content:space-between;align-items:center;padding:60px 44px 30px;background:var(--navy);color:#fff}
+#pass .slot{position:absolute;left:50%;top:20px;width:112px;height:22px;margin-left:-56px;border-radius:11px;background:var(--pink)}
+#pass .hd b{font-size:54px;font-weight:900}
+#pass .hd span{font-size:22px;padding:8px 14px;border:2px solid rgba(255,255,255,.6);border-radius:999px}
+#pass .bd{display:grid;grid-template-columns:250px 1fr;gap:36px;padding:42px 44px 30px}
+#pass .ph{width:250px;height:314px;border-radius:18px;overflow:hidden;background:#ddd}
+#pass .ph img{width:100%;height:100%;object-fit:cover;display:block}
+#pass h3{font-size:100px;font-weight:900;letter-spacing:-.04em;line-height:1}
+#pass .en{margin:14px 0 18px;font-size:26px;color:#4B566F}
+#pass .roles{font-size:32px;font-weight:700;line-height:1.5}
+#pass .code{margin:6px 44px 40px;height:90px;background:repeating-linear-gradient(90deg,var(--ink) 0 4px,transparent 4px 8px,var(--ink) 8px 10px,transparent 10px 16px,var(--ink) 16px 22px,transparent 22px 24px,var(--ink) 24px 26px,transparent 26px 34px)}
+#pass .shine{position:absolute;top:-30%;bottom:-30%;left:0;width:240px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.8),transparent)}
+#handles{left:60px;right:60px;top:1120px;display:grid;gap:16px;text-align:center;color:var(--navy)}
+#handles .h1{font-size:46px;font-weight:900;letter-spacing:-.01em}
+#handles .h2{font-size:26px}
+.spk{position:absolute;left:0;top:0;width:70px;height:70px;color:#fff;visibility:hidden;filter:drop-shadow(0 0 12px rgba(255,255,255,.9))}
+
+/* ── overlays ── */
+#irisRing{left:0;top:0;border-radius:50%;border:16px solid #fff;visibility:hidden;z-index:28}
+#hud{left:56px;right:56px;top:84px;display:flex;justify-content:space-between;align-items:center;visibility:hidden;z-index:30}
+#hud .tally{display:flex;align-items:center;gap:14px;padding:16px 24px;border-radius:999px;background:var(--tally);font-size:26px;box-shadow:0 10px 30px rgba(255,45,75,.35)}
+#hud .tally .dot{color:#fff;font-size:24px}
+#hud .tally.off{background:#4B5366;box-shadow:none}
+#hud .tc{padding:16px 22px;border-radius:999px;background:rgba(11,16,32,.6);font-size:26px;font-weight:700;letter-spacing:.04em}
+#hud .tc em{font-style:normal;color:var(--tally);margin-right:10px;letter-spacing:.16em;font-weight:800}
+#grain{left:0;top:0;width:1080px;height:1920px;opacity:.06;mix-blend-mode:overlay;z-index:31}
+#flash{inset:0;background:#fff;opacity:0;z-index:33}
+#dot{left:528px;top:948px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 0 30px 12px rgba(255,255,255,.8);opacity:0}
+</style>
+</head>
+<body>
+<div id="stage"><div id="screen">
+
+  <section class="scene" id="bars">
+    <div class="abs" id="barRows"></div>
+    <div class="abs" id="sync"></div>
+    <div class="abs" id="slate">
+      <div class="stick"></div><div class="base"></div>
+      <div class="board">
+        <div class="r"><span class="mono">Program</span><b>이채원 ON AIR</b></div>
+        <div class="r"><span class="mono">Host</span><b>LEE CHAEWON</b></div>
+        <div class="r"><span class="mono">Scene · Take</span><b>01 · 1</b></div>
+        <div class="r"><span class="mono">TC</span><b class="y" id="slateTc">00:59:58:36</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="leader">
+    <div class="abs" id="ring"><div id="sweep"></div><i class="r1"></i><i class="r2"></i><i class="hx"></i><i class="vx"></i><span id="num">3</span></div>
+    <canvas class="abs" id="dust" width="540" height="960"></canvas>
+    <div class="abs lbl mono">Stand by</div>
+  </section>
+
+  <section class="scene" id="slam">
+    <div class="abs" id="rays"></div>
+    <div class="abs wave" id="w1"></div><div class="abs wave" id="w2"></div>
+    <div class="abs" id="lamp"></div>
+    <div class="abs" id="slamWord" data-split>ON AIR</div>
+    <div class="abs mono" id="slamSub">LIVE · 이채원</div>
+  </section>
+
+  <section class="scene" id="hero">
+    <div id="heroCam">
+      <div id="heroBg"></div>
+      <div class="abs" id="glow"></div>
+      <div class="abs" id="beam"></div>
+      <div class="abs" id="word"><div class="ln" data-split="mask">CHAE</div><div class="ln" data-split="mask">WON</div></div>
+      <div class="abs" id="figWrap"><img id="fig" src="../assets/img/cut_pink_side.webp" alt=""></div>
+    </div>
+    <div id="heroGfx">
+      <div class="abs mono" id="kicker"><span class="dot"></span>Sports · Wellness · Fashion · Tech</div>
+      <div class="abs" id="name" data-split>이채원</div>
+      <div class="abs" id="nameEn">LEE CHAEWON</div>
+      <div class="abs" id="lt">
+        <div class="tag mono"><span class="dot"></span>On Air</div>
+        <div class="main"><b>이채원</b><div class="rwin"><div class="roles"><span class="role">스포츠 아나운서</span><span class="role">라이브커머스 쇼호스트</span><span class="role">행사 MC · 리포터</span></div></div></div>
+      </div>
+    </div>
+    <div class="abs" id="vf">
+      <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+      <div class="abs rec mono"><span class="dot" id="recDot"></span>REC <b id="recTc">00:00:00:00</b></div>
+      <div class="abs spec mono">4K · 59.94P · ISO 400</div>
+      <div class="abs meter"><i id="mL"></i><i id="mR"></i></div>
+      <div class="abs cross"></div>
+    </div>
+    <div class="abs" id="af"><i class="k k1"></i><i class="k k2"></i><i class="k k3"></i><i class="k k4"></i><b class="mono" id="afLbl">AF</b></div>
+  </section>
+
+  <section class="scene" id="sportsT">
+    <div id="sportsTIn">
+      <div class="abs stripes"></div>
+      <div class="abs bignum">01</div>
+      <div class="abs chipRow"><div class="chip mono"><span class="dot"></span>Channel 1 · Sports</div></div>
+      <div class="abs ttl"><div class="ln fit" data-w="900" data-split="mask">SPORTS</div><div class="ln fit alt" data-w="900" data-split="mask">ANNOUNCER</div></div>
+      <div class="abs tsub"><div class="sl"><span>안전한 운영 위에</span></div><div class="sl"><span><mark>최고의 즐거움</mark>을 더하는 진행</span></div></div>
+      <div class="abs tmeta mono">Main MC · 2024—2026</div>
+    </div>
+  </section>
+
+  <section class="scene static" id="static1"><canvas class="abs noise" width="540" height="960"></canvas><div class="abs lines"></div><div class="abs osd"><b class="osdN">CH 01</b><small class="mono">Sports</small></div></section>
+
+  <section class="scene" id="sportsM">
+    <div class="abs" id="checker"></div>
+    <figure class="abs card" id="c1"><img src="../assets/img/ev_granfondo.jpg" alt=""><figcaption class="cap"><b>라이더 앞 출발선 진행</b><span class="mono">DMZ Rally</span></figcaption></figure>
+    <figure class="abs card" id="c2"><img src="../assets/img/ev_interview.jpg" alt=""><figcaption class="cap"><b>현장 인터뷰</b><span class="mono">Reporter</span></figcaption></figure>
+    <figure class="abs card" id="c3"><img src="../assets/img/ev_bmw.jpg" alt=""><figcaption class="cap"><b>BMW M CLUB KOREA</b></figcaption></figure>
+    <div class="abs" id="counter"><div class="odo" id="odo"></div><div class="cl"><p>러너 앞에서 연<br>개막 무대</p><small>2026 철원 DMZ 국제평화마라톤<br>한국일보 보도</small></div></div>
+    <div class="abs" id="ticker"><span class="lab mono">Main MC</span><div class="trk" id="trk"></div></div>
+  </section>
+
+  <section class="scene" id="liveT">
+    <div class="abs" id="bokeh"></div>
+    <div class="abs chipRow"><div class="chip mono"><span class="dot"></span>Channel 2 · Live</div></div>
+    <div class="abs ttl"><div class="ln fit" data-w="700" data-split>LIVE</div><div class="ln fit alt" data-w="900" data-split>COMMERCE</div></div>
+    <div class="abs tsub"><div class="sl"><span><mark>매출로 이어지는 진행,</mark></span></div><div class="sl"><span>브랜드를 빛내는 소통</span></div></div>
+    <div class="abs" id="liveHearts"></div>
+  </section>
+
+  <section class="scene static" id="static2"><canvas class="abs noise" width="540" height="960"></canvas><div class="abs lines"></div><div class="abs osd"><b class="osdN">CH 02</b><small class="mono">Live</small></div></section>
+
+  <section class="scene" id="liveW">
+    <div class="abs" id="wall"></div>
+    <div class="abs" id="zoomUi">
+      <div class="abs badge mono"><span class="rp"><span class="dot"></span>Replay</span><span>1:03:06</span></div>
+      <div class="abs brand"><b>풀무원 리셋클렌즈</b><span>네이버 쇼핑라이브 · 2026.07.30</span></div>
+      <div class="abs" id="zoomHearts"></div>
+    </div>
+  </section>
+
+  <section class="scene" id="prompt">
+    <div class="abs glare"></div>
+    <div class="abs top mono"><span><span class="dot"></span>Prompter · Cam 1</span><span id="pcount">01 / 05</span></div>
+    <div class="abs" id="plines"><p class="pl">현장에는</p><p class="pl"><mark>에너지</mark>를,</p><p class="pl">방송에는</p><p class="pl"><mark>신뢰</mark>를</p><p class="pl">전하는 진행자</p></div>
+    <div class="abs cue l"></div><div class="abs cue r"></div>
+    <div class="abs motto">Be Healthy &amp; Wellthy</div>
+    <div class="abs pbar"><i id="pfill"></i></div>
+  </section>
+
+  <section class="scene" id="end">
+    <div class="abs" id="endBg"></div>
+    <div class="abs" id="shutter"></div>
+    <div class="abs" id="passWrap">
+      <div class="abs" id="lanyard"><span class="mono">On Air · 이채원 · On Air · 이채원 · On Air · 이채원</span></div>
+      <div class="abs" id="pass">
+        <div class="hd"><b>STAFF · MC</b><span class="mono">All Access</span></div>
+        <div class="slot"></div>
+        <div class="bd"><div class="ph"><img src="../assets/img/main_headshot.jpg" alt=""></div>
+          <div><h3>이채원</h3><div class="en mono">Lee Chaewon</div><div class="roles">스포츠 아나운서<br>라이브커머스 쇼호스트<br>행사 MC · 리포터</div></div></div>
+        <div class="code"></div>
+        <div class="shine"></div>
+      </div>
+      <div class="abs" id="clip"></div>
+    </div>
+    <div class="abs" id="handles"><div class="h1">IG @c._.1ee · YT @chea_1ee</div><div class="h2 mono">Sports · Wellness · Fashion · Tech</div></div>
+    <div class="abs" id="sparks"></div>
+  </section>
+
+  <div class="abs" id="irisRing"></div>
+  <div class="abs" id="hud"><div class="tally mono" id="tally"><span class="dot" id="tallyDot"></span><span id="tallyTxt">On Air</span></div><div class="tc"><em>TC</em><span id="hudTc">01:00:00:00</span></div></div>
+  <canvas class="abs" id="grain" width="540" height="960"></canvas>
+  <div class="abs" id="flash"></div>
+</div><div class="abs" id="dot"></div></div>
+
+<script src="vendor/gsap.min.js"></script>
+<script>
+const DATA = /*DATA*/null;
+(() => {
+"use strict";
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const G = window.gsap, FPS = 60, DUR = 15;
+
+// ───────── math ─────────
+const clamp = (v, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
+const lerp = (a, b, p) => a + (b - a) * p;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const ease = {
+  o2: (p) => 1 - (1 - p) * (1 - p), o3: (p) => 1 - Math.pow(1 - p, 3), o4: (p) => 1 - Math.pow(1 - p, 4),
+  i2: (p) => p * p, i3: (p) => p * p * p,
+  io3: (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2),
+  ioExpo: (p) => (p <= 0 ? 0 : p >= 1 ? 1 : p < 0.5 ? Math.pow(2, 20 * p - 10) / 2 : (2 - Math.pow(2, -20 * p + 10)) / 2),
+  oBack: (p, s = 1.70158) => 1 + (s + 1) * Math.pow(p - 1, 3) + s * Math.pow(p - 1, 2),
+};
+const hash = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453123; return x - Math.floor(x); };
+const frameOf = (t) => Math.floor(t * FPS + 1e-6);
+const tc = (sec) => { const f = Math.max(0, Math.floor(sec * FPS + 1e-6)), s = Math.floor(f / FPS);
+  return [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60, f % FPS].map((n) => String(n).padStart(2, "0")).join(":"); };
+
+// ───────── schedule (seconds) ─────────
+const T = { slam: 1.4, iris: [1.78, 2.0], lock: 3.0, nameHit: 3.05, whip1: [4.74, 4.94], sports: 5.4, cards: [6.4, 6.85, 7.25],
+  odo: [7.6, 8.15], whip2: [8.24, 8.42], live: 8.9, shrink: [9.55, 9.8], take: 10.3, zoom: [10.42, 10.86], swipe: [11.22, 11.45],
+  lines: [11.45, 11.83, 12.21, 12.59, 12.97], shutter: 13.24, land: 13.66, off: 14.38, crt: 14.46 };
+const VIS = [["bars", 0, 0.5], ["leader", 0.5, 1.4], ["slam", 1.4, 2.0], ["hero", 1.78, 4.95], ["sportsT", 5.3, 6.62], ["static1", 4.74, 5.62],
+  ["sportsM", 6.36, 8.43], ["liveT", 8.8, 10.9], ["static2", 8.24, 9.12], ["liveW", 9.52, 11.47], ["prompt", 11.2, 13.48], ["end", 13.22, 15.1]];
+const SHAKES = [[1.4, 0.36, 26], [T.nameHit, 0.2, 10], [6.4, 0.16, 12], [6.85, 0.16, 12], [7.25, 0.16, 12], [T.take, 0.1, 5], [T.land, 0.2, 9]];
+const FLASHES = [[0.38, 0.45, 0.04], [1.4, 1, 0.09], [T.nameHit, 0.32, 0.05], [6.4, 0.24, 0.05], [6.85, 0.2, 0.05], [7.25, 0.2, 0.05], [13.42, 0.5, 0.07]];
+
+// ───────── build dom ─────────
+for (const el of $$("[data-split]")) {
+  const mask = el.dataset.split === "mask", txt = el.textContent; el.textContent = "";
+  for (const c of txt) {
+    const ci = document.createElement("span"); ci.className = "ci"; ci.textContent = c === " " ? " " : c;
+    if (mask) { const m = document.createElement("span"); m.className = "ch"; m.appendChild(ci); el.appendChild(m); } else el.appendChild(ci);
+  }
+}
+const BARS = [
+  ["#C0C0C0", "#C0C000", "#00C0C0", "#00C000", "#C000C0", "#C00000", "#0000C0"].map((c) => [c, 1]),
+  ["#0000C0", "#131313", "#C000C0", "#131313", "#00C0C0", "#131313", "#C0C0C0"].map((c) => [c, 1]),
+  [["#00214C", 5], ["#FFFFFF", 5], ["#32006A", 5], ["#131313", 5], ["#090909", 5 / 3], ["#131313", 5 / 3], ["#1D1D1D", 5 / 3], ["#131313", 5]],
+];
+$("#barRows").innerHTML = BARS.map((row) => `<div class="row">${row.map(([c, f]) => `<i style="background:${c};flex:${f} 1 0"></i>`).join("")}</div>`).join("");
+$("#wall").innerHTML = DATA.tiles.map((d, i) => `<div class="tile" style="left:${(i % 4) * 244}px;top:${Math.floor(i / 4) * 421}px"><div class="scr">${d.src ? `<img src="${d.src}" alt="">` : ""}</div>${d.label ? `<span class="lbl">${d.label}</span>` : ""}<span class="tl"></span><span class="tg"></span></div>`).join("");
+const trkHtml = DATA.events.map((e) => `<span>${e}</span><b>·</b>`).join("");
+$("#trk").innerHTML = trkHtml + trkHtml;
+const odo = $("#odo"), odoCols = [];
+for (const p of [4, 3, null, 2, 1, 0]) {
+  if (p === null) { const s = document.createElement("span"); s.textContent = ","; odo.appendChild(s); continue; }
+  const col = document.createElement("span"), strip = document.createElement("span"); col.className = "col"; strip.className = "strip";
+  for (let k = 0; k <= 10; k++) { const d = document.createElement("span"); d.textContent = k % 10; strip.appendChild(d); }
+  col.appendChild(strip); odo.appendChild(col); odoCols.push({ p, strip });
+}
+const unit = document.createElement("span"); unit.className = "unit"; unit.textContent = "명"; odo.appendChild(unit);
+$("#shutter").innerHTML = Array.from({ length: 10 }, (_, i) => `<i style="top:${i * 192}px"></i>`).join("");
+const HEART = '<svg viewBox="0 0 32 29"><path fill="currentColor" d="M16 29l-2.3-2.1C5.5 19.5 0 14.6 0 8.7 0 3.8 3.8 0 8.7 0c2.8 0 5.4 1.3 7.3 3.4C17.9 1.3 20.5 0 23.3 0 28.2 0 32 3.8 32 8.7c0 5.9-5.5 10.8-13.7 18.2L16 29z"/></svg>';
+const STAR = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 0C12.9 7.4 16.6 11.1 24 12 16.6 12.9 12.9 16.6 12 24 11.1 16.6 7.4 12.9 0 12 7.4 11.1 11.1 7.4 12 0Z"/></svg>';
+const HCOL = ["#FE8AAD", "#FF2D4B", "#FFFFFF", "#FFB3C9"];
+const mkHearts = (host, n, t0, span, x0, xw, y0, seed) => Array.from({ length: n }, (_, i) => {
+  const el = document.createElement("i"); el.className = "hrt"; el.innerHTML = HEART; el.style.color = HCOL[i % 4]; host.appendChild(el);
+  return { el, t0: t0 + (i / n) * span + hash(seed + i * 3.3) * 0.05, x: x0 + hash(seed + i * 5.1) * xw, y: y0, rise: 520 + hash(seed + i * 7.7) * 520,
+    sway: 22 + hash(seed + i * 9.9) * 40, size: 0.8 + hash(seed + i * 2.2) * 0.75, ph: hash(seed + i) * 6.28 };
+});
+const HZ = mkHearts($("#zoomHearts"), 16, 10.8, 0.55, 820, 170, 1560, 3);
+const HL = mkHearts($("#liveHearts"), 8, 9.02, 0.5, 860, 150, 1640, 17);
+const SPK = [[110, 440, 1, 13.92], [960, 520, 0.8, 14.0], [930, 1000, 1.25, 14.08], [150, 930, 0.7, 14.14], [540, 1250, 0.9, 14.22], [1000, 270, 0.6, 14.05]].map(([x, y, s, t0]) => {
+  const el = document.createElement("i"); el.className = "spk"; el.innerHTML = STAR; $("#sparks").appendChild(el); return { el, x, y, s, t0 };
+});
+const BOKEH = Array.from({ length: 9 }, (_, i) => {
+  const el = document.createElement("i"), d = 90 + hash(i * 4.4) * 220; el.style.width = el.style.height = d + "px"; $("#bokeh").appendChild(el);
+  return { el, d, x: hash(i * 1.9) * 1080, y: 300 + hash(i * 6.1) * 1500, sp: 40 + hash(i * 8.3) * 80 };
+});
+
+// ───────── refs ─────────
+const sc = Object.fromEntries(VIS.map(([id]) => [id, document.getElementById(id)]));
+const screen = $("#screen"), heroCam = $("#heroCam"), fig = $("#fig"), af = $("#af"), afLbl = $("#afLbl"), nameEn = $("#nameEn");
+const wall = $("#wall"), tiles = $$(".tile"), passWrap = $("#passWrap"), flash = $("#flash"), hud = $("#hud"), tally = $("#tally");
+const noiseCv = { static1: $("#static1 .noise"), static2: $("#static2 .noise") };
+const grainCv = $("#grain"), dustCv = $("#dust");
+
+// ───────── canvases ─────────
+const bufs = new Map();
+const imgData = (cv) => { let b = bufs.get(cv); if (!b) { b = cv.getContext("2d").createImageData(cv.width, cv.height); bufs.set(cv, b); } return b; };
+function drawNoise(cv, f, seed) {
+  const ctx = cv.getContext("2d"), w = cv.width, h = cv.height, img = imgData(cv), d = img.data;
+  let s = (Math.imul(f + 7, 2654435761) ^ seed) | 1;
+  const roll = ((f * 11) % (h + 160)) - 80;
+  for (let y = 0; y < h; y++) {
+    const band = Math.abs(y - roll) < 46 ? 46 : 0, row = (hash(f * 31.7 + y * 0.13) - 0.5) * 46, tear = hash(f * 3.1 + y) < 0.004 ? 70 : 0;
+    for (let x = 0; x < w; x++) {
+      s ^= s << 13; s ^= s >>> 17; s ^= s << 5;
+      let v = s & 255; v = (v * v) / 255 + band + row + tear; v = v < 0 ? 0 : v > 255 ? 255 : v;
+      const o = (y * w + x) << 2; d[o] = v; d[o + 1] = v; d[o + 2] = v > 245 ? 255 : v + 10; d[o + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+}
+function drawGrain(f) {
+  const ctx = grainCv.getContext("2d"), img = imgData(grainCv), d = img.data, n = d.length;
+  let s = Math.imul(f + 3, 2246822519) | 1;
+  for (let o = 0; o < n; o += 4) { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; const v = 128 + ((s & 255) - 128) * 0.9; d[o] = d[o + 1] = d[o + 2] = v; d[o + 3] = 255; }
+  ctx.putImageData(img, 0, 0);
+}
+function drawDust(f) {
+  const ctx = dustCv.getContext("2d"); ctx.clearRect(0, 0, 540, 960);
+  const n = 7 + Math.floor(hash(f * 3.1) * 9);
+  for (let i = 0; i < n; i++) {
+    ctx.fillStyle = hash(i + f * 5.3) < 0.55 ? "rgba(0,0,0,.75)" : "rgba(255,255,255,.6)";
+    ctx.beginPath(); ctx.arc(hash(f * 7.1 + i) * 540, hash(f * 13.3 + i * 3) * 960, 0.6 + hash(f + i * 17.7) * 2.6, 0, 6.2832); ctx.fill();
+  }
+  if (hash(f * 0.93) < 0.65) {
+    const x = hash(f * 2.3) * 540; ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = 0.9;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + (hash(f) - 0.5) * 24, 960); ctx.stroke();
+  }
+}
+
+// ───────── helpers driven by time ─────────
+const FACE = { cx: 0.4341, cy: 0.1597, w: 0.3871, h: 0.1649 };
+const AFP = [{ x: 540, y: 880, w: 300, h: 300 }, { x: 330, y: 1230, w: 250, h: 250 }, { x: 880, y: 1160, w: 220, h: 220 }];
+const focusBlur = (t) => {
+  if (t < 2.42 || t >= 2.98) return 0;
+  if (t < 2.52) return (6 * (t - 2.42)) / 0.1;
+  const wob = (u) => 4.6 + 1.6 * Math.cos(((u - 2.52) / 0.17) * Math.PI * 2);
+  return t < 2.86 ? wob(t) : wob(2.86) * (1 - ease.o3((t - 2.86) / 0.12));
+};
+const scramble = (el, final, p, seed) => {
+  const pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&"; let out = "";
+  for (let i = 0; i < final.length; i++) {
+    const r = (i + 1) / final.length;
+    if (final[i] === " ") out += " ";
+    else if (p >= r) out += final[i];
+    else if (p > r - 0.4) out += pool[Math.floor(hash(seed + i * 7 + Math.floor(p * 40)) * pool.length)];
+    else out += " ";
+  }
+  el.textContent = out;
+};
+const setOdo = (v) => {
+  for (const { p, strip } of odoCols) {
+    const u = Math.pow(10, p); let d;
+    if (p === 0) d = v % 10;
+    else { const base = Math.floor(v / u) % 10, r = v % u; d = base + clamp(r - (u - 1)); }
+    strip.style.transform = `translateY(${(-d).toFixed(4)}em)`;
+  }
+};
+const TILE = { w: 228, h: 405, gx: 244, gy: 421 }, WALLP = { x: 60, y: 168 }, WALLC = { x: 480, y: 834 }, ZT = { x: TILE.gx + TILE.w / 2, y: TILE.gy + TILE.h / 2 }, ZS = 4.2;
+const wallXform = (t) => {
+  const s0 = lerp(1.04, 1, ease.o3(prog(t, 9.55, 10.35))), p = ease.ioExpo(prog(t, T.zoom[0], T.zoom[1]));
+  const s = Math.exp(lerp(Math.log(s0), Math.log(ZS), p)), fx = lerp(WALLC.x, ZT.x, p), fy = lerp(WALLC.y, ZT.y, p);
+  const ay = lerp(WALLP.y + WALLC.y, 960, p);  // the wall rests at its own centre; the zoom ends with PGM centred on screen
+  return { s, tx: 540 - WALLP.x - s * fx, ty: ay - WALLP.y - s * fy };
+};
+const heartFrame = (H, t) => {
+  for (const [i, h] of H.entries()) {
+    const age = t - h.t0, life = 1.05;
+    if (age < 0 || age > life) { h.el.style.visibility = "hidden"; continue; }
+    const k = age / life, y = h.y - h.rise * ease.o2(k), x = h.x + h.sway * Math.sin(age * 7 + h.ph);
+    const pop = age < 0.14 ? ease.oBack(age / 0.14, 2.4) : 1, sz = h.size * pop;
+    h.el.style.visibility = "visible"; h.el.style.opacity = (1 - prog(age, 0.62, life)).toFixed(3);
+    h.el.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) rotate(${(Math.sin(age * 5 + i) * 12).toFixed(1)}deg) scale(${sz.toFixed(3)})`;
+  }
+};
+
+// ───────── gsap timeline (layout tweens) ─────────
+const tl = G.timeline({ paused: true, defaults: { ease: "power3.out", lazy: false } });
+function buildTimeline() {
+  // bars + slate
+  G.set("#slate", { opacity: 0, scale: 0.95 }); tl.to("#slate", { opacity: 1, scale: 1, duration: 0.12, ease: "power2.out" }, 0.03);
+  G.set("#slate .stick", { rotation: -24 }); tl.to("#slate .stick", { rotation: 0, duration: 0.08, ease: "power3.in" }, 0.3);
+  // on air
+  const slamCi = $$("#slamWord .ci"); G.set(slamCi, { scale: 3.2, opacity: 0 });
+  tl.to(slamCi, { scale: 1, opacity: 1, duration: 0.26, ease: "expo.out", stagger: 0.03 }, T.slam);
+  G.set("#lamp", { scale: 0 }); tl.to("#lamp", { scale: 1, duration: 0.32, ease: "back.out(3)" }, T.slam);
+  G.set(".wave", { scale: 0.2, opacity: 0 });
+  tl.fromTo("#w1", { scale: 0.2, opacity: 1 }, { scale: 4.4, opacity: 0, duration: 0.5, ease: "power2.out", immediateRender: false }, T.slam);
+  tl.fromTo("#w2", { scale: 0.2, opacity: 1 }, { scale: 3.4, opacity: 0, duration: 0.5, ease: "power2.out", immediateRender: false }, T.slam + 0.08);
+  G.set("#rays", { rotation: 0, scale: 1.3 }); tl.to("#rays", { rotation: 16, scale: 1, duration: 0.62, ease: "power2.out" }, T.slam);
+  G.set("#slamSub", { opacity: 0, y: 30 }); tl.to("#slamSub", { opacity: 1, y: 0, duration: 0.22 }, 1.52);
+  // hero
+  const wordCi = $$("#word .ci"); G.set(wordCi, { yPercent: 118 });
+  tl.to(wordCi, { yPercent: 0, duration: 0.6, ease: "expo.out", stagger: 0.045 }, 1.8);
+  G.set("#word", { x: 34 }); tl.to("#word", { x: -40, duration: 3.1, ease: "none" }, 1.8);
+  G.set("#figWrap", { y: 620, scale: 1.08 }); tl.to("#figWrap", { y: 0, scale: 1, duration: 0.8, ease: "expo.out" }, 1.72);
+  G.set("#beam", { x: -700, rotation: 18 }); tl.to("#beam", { x: 1500, duration: 1.1, ease: "power1.inOut" }, 2.0);
+  for (const [k, dx, dy] of [["tl", -70, -70], ["tr", 70, -70], ["bl", -70, 70], ["br", 70, 70]]) {
+    G.set(`#vf .${k}`, { x: dx, y: dy, opacity: 0 }); tl.to(`#vf .${k}`, { x: 0, y: 0, opacity: 1, duration: 0.24, ease: "expo.out" }, 2.28);
+  }
+  G.set(["#vf .rec", "#vf .spec", "#vf .meter", "#vf .cross"], { opacity: 0 });
+  tl.to(["#vf .rec", "#vf .spec", "#vf .meter"], { opacity: 1, duration: 0.08, stagger: 0.04 }, 2.34);
+  tl.to("#vf .cross", { opacity: 0.85, duration: 0.08 }, 2.36);
+  tl.to("#vf .cross", { opacity: 0, duration: 0.15 }, T.lock);
+  const nameCi = $$("#name .ci"); G.set(nameCi, { scale: 1.9, opacity: 0, yPercent: -8 });
+  tl.to(nameCi, { scale: 1, opacity: 1, yPercent: 0, duration: 0.3, ease: "expo.out", stagger: 0.05 }, T.nameHit);
+  G.set("#kicker", { clipPath: "inset(0% 100% 0% 0% round 999px)" }); tl.to("#kicker", { clipPath: "inset(0% 0% 0% 0% round 999px)", duration: 0.3 }, 3.2);
+  G.set("#nameEn", { opacity: 0 }); tl.to("#nameEn", { opacity: 1, duration: 0.04 }, 3.18);
+  G.set("#lt .tag", { scaleX: 0 }); tl.to("#lt .tag", { scaleX: 1, duration: 0.2, ease: "expo.out" }, 3.42);
+  G.set("#lt .main", { clipPath: "inset(0% 100% 0% 0%)" }); tl.to("#lt .main", { clipPath: "inset(0% 0% 0% 0%)", duration: 0.28, ease: "expo.out" }, 3.5);
+  tl.to("#lt .roles", { yPercent: -100 / 3, duration: 0.22, ease: "back.out(2)" }, 4.0);
+  tl.to("#lt .roles", { yPercent: -200 / 3, duration: 0.22, ease: "back.out(2)" }, 4.42);
+  // sports title
+  G.set("#sportsT .chip", { opacity: 0, scale: 0.8 }); tl.to("#sportsT .chip", { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, 5.4);
+  const sp = $$("#sportsT .ttl .ln").map((l) => $$(".ci", l));
+  sp[0].forEach((c, i) => G.set(c, { yPercent: i % 2 ? -118 : 118 })); sp[1].forEach((c, i) => G.set(c, { yPercent: i % 2 ? 118 : -118 }));
+  tl.to(sp[0], { yPercent: 0, duration: 0.5, ease: "expo.out", stagger: 0.03 }, 5.42);
+  tl.to(sp[1], { yPercent: 0, duration: 0.5, ease: "expo.out", stagger: 0.025 }, 5.52);
+  G.set("#sportsT .tsub .sl > span", { yPercent: 110 }); tl.to("#sportsT .tsub .sl > span", { yPercent: 0, duration: 0.4, ease: "expo.out", stagger: 0.08 }, 5.7);
+  G.set("#sportsT mark", { "--hl": "0%" }); tl.to("#sportsT mark", { "--hl": "100%", duration: 0.3, ease: "power2.inOut" }, 5.92);
+  G.set("#sportsT .tmeta", { opacity: 0 }); tl.to("#sportsT .tmeta", { opacity: 1, duration: 0.2 }, 5.96);
+  G.set("#sportsT .stripes", { x: 0 }); tl.to("#sportsT .stripes", { x: 280, duration: 1.35, ease: "none" }, 5.3);
+  G.set("#sportsT .bignum", { scale: 1.15, opacity: 0 }); tl.to("#sportsT .bignum", { scale: 1, opacity: 1, duration: 1.0, ease: "power2.out" }, 5.35);
+  tl.to("#sportsTIn", { scale: 0.86, opacity: 0.25, duration: 0.25, ease: "power2.in" }, 6.36);
+  // sports montage
+  G.set("#checker", { rotation: -10, scale: 1.12 }); tl.to("#checker", { rotation: -4, scale: 1, duration: 2.1, ease: "none" }, 6.36);
+  G.set(["#c1", "#c2", "#c3"], { filter: "brightness(1)" });
+  G.set("#c1", { x: 1250, rotation: 12, scale: 1.1 }); tl.to("#c1", { x: 0, rotation: -2, scale: 1, duration: 0.38, ease: "expo.out" }, T.cards[0]);
+  G.set("#c2", { x: -1050, rotation: -14, scale: 1.1 }); tl.to("#c2", { x: 0, rotation: 3, scale: 1, duration: 0.38, ease: "expo.out" }, T.cards[1]);
+  G.set("#c3", { y: 1500, rotation: 16, scale: 1.1 }); tl.to("#c3", { y: 0, rotation: -4, scale: 1, duration: 0.4, ease: "expo.out" }, T.cards[2]);
+  tl.to("#c1", { scale: 0.95, filter: "brightness(0.72)", duration: 0.3, ease: "power2.out" }, T.cards[1]);
+  tl.to("#c2", { scale: 0.96, filter: "brightness(0.8)", duration: 0.3, ease: "power2.out" }, T.cards[2]);
+  tl.to("#c1", { scale: 0.92, filter: "brightness(0.6)", duration: 0.3, ease: "power2.out" }, T.cards[2]);
+  G.set(".card .cap", { opacity: 0, x: -30 });
+  T.cards.forEach((t0, i) => tl.to(`#c${i + 1} .cap`, { opacity: 1, x: 0, duration: 0.25 }, t0 + 0.2));
+  G.set("#counter", { y: 300, opacity: 0 }); tl.to("#counter", { y: 0, opacity: 1, duration: 0.35, ease: "expo.out" }, 7.5);
+  G.set("#ticker", { y: 120, opacity: 0 }); tl.to("#ticker", { y: 0, opacity: 1, duration: 0.3, ease: "expo.out" }, 6.5);
+  // live title
+  G.set("#liveT .chip", { opacity: 0, scale: 0.8 }); tl.to("#liveT .chip", { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, 8.9);
+  const lv = $$("#liveT .ttl .ci"); lv.forEach((c, i) => G.set(c, { scale: 0, opacity: 0, rotation: (hash(i * 2.7) - 0.5) * 44 }));
+  tl.to(lv, { scale: 1, opacity: 1, rotation: 0, duration: 0.45, ease: "back.out(2.6)", stagger: 0.028 }, 8.94);
+  G.set("#liveT .tsub .sl > span", { yPercent: 110 }); tl.to("#liveT .tsub .sl > span", { yPercent: 0, duration: 0.4, ease: "expo.out", stagger: 0.08 }, 9.12);
+  G.set("#liveT mark", { "--hl": "0%" }); tl.to("#liveT mark", { "--hl": "100%", duration: 0.3, ease: "power2.inOut" }, 9.3);
+  // multiview
+  G.set(tiles, { transformPerspective: 900 });
+  tiles.forEach((el, i) => { if (!i) return; const d = (Math.floor(i / 4) + (i % 4)) * 0.045 + hash(i * 1.3) * 0.02;
+    G.set(el, { rotationY: -90, opacity: 0 }); tl.to(el, { rotationY: 0, opacity: 1, duration: 0.3, ease: "power3.out" }, 9.62 + d); });
+  G.set("#zoomUi .badge", { opacity: 0, x: -40 }); tl.to("#zoomUi .badge", { opacity: 1, x: 0, duration: 0.25 }, 10.8);
+  G.set("#zoomUi .brand", { opacity: 0, y: 90 }); tl.to("#zoomUi .brand", { opacity: 1, y: 0, duration: 0.3, ease: "expo.out" }, 10.86);
+  // prompter
+  const pls = $$(".pl"); G.set("#plines", { y: 860 }); G.set(pls, { scale: 0.86 }); G.set($$("#prompt mark"), { "--hl": "0%" });
+  T.lines.forEach((t0, i) => {
+    if (i) tl.to("#plines", { y: 860 - 200 * i, duration: 0.18, ease: "power3.inOut" }, t0 - 0.16);
+    tl.to(pls[i], { color: "#FFFFFF", scale: 1, duration: 0.14, ease: "power2.out" }, t0 - 0.08);
+    if (i) tl.to(pls[i - 1], { color: "#4A5268", scale: 0.86, duration: 0.14 }, t0 - 0.08);
+  });
+  tl.to($("mark", pls[1]), { "--hl": "100%", duration: 0.22, ease: "power2.inOut" }, T.lines[1] + 0.04);
+  tl.to($("mark", pls[3]), { "--hl": "100%", duration: 0.22, ease: "power2.inOut" }, T.lines[3] + 0.04);
+  G.set("#prompt .motto", { opacity: 0, y: 24 }); tl.to("#prompt .motto", { opacity: 1, y: 0, duration: 0.3 }, 12.95);
+  // end card
+  $$("#shutter i").forEach((b, i) => { G.set(b, { x: i % 2 ? 1100 : -1100 }); tl.to(b, { x: 0, duration: 0.17, ease: "power3.out" }, T.shutter + i * 0.016); });
+  tl.set("#endBg", { opacity: 1 }, 13.44); tl.set("#shutter", { opacity: 0 }, 13.46);
+  G.set(["#handles .h1", "#handles .h2"], { opacity: 0, y: 30 });
+  tl.to("#handles .h1", { opacity: 1, y: 0, duration: 0.3, ease: "expo.out" }, 13.78); tl.to("#handles .h2", { opacity: 1, y: 0, duration: 0.3, ease: "expo.out" }, 13.88);
+  G.set("#pass .shine", { x: -420, skewX: -18 }); tl.to("#pass .shine", { x: 1150, duration: 0.45, ease: "power2.inOut" }, 13.95);
+}
+
+// ───────── per-frame state ─────────
+function update(t) {
+  const f = frameOf(t);
+  for (const [id, a, b] of VIS) sc[id].style.visibility = t >= a && t < b ? "visible" : "hidden";
+
+  // bars + slate
+  if (t < 0.5) {
+    $("#barRows").style.transform = `translateY(${(hash(f * 0.37) < 0.25 ? (hash(f) - 0.5) * 16 : 0).toFixed(1)}px)`;
+    $("#sync").style.transform = `translateY(${(((t * 2600) % 2300) - 220).toFixed(1)}px)`;
+    $("#slateTc").textContent = tc(3600 + t - T.slam);
+  }
+  // countdown leader
+  if (t >= 0.5 && t < 1.4) {
+    const k = Math.min(2, Math.floor((t - 0.5) / 0.3)), lt = t - 0.5 - k * 0.3, a = clamp(lt / 0.3) * 360;
+    $("#num").textContent = 3 - k;
+    $("#num").style.transform = `scale(${(1 + 0.3 * Math.pow(1 - clamp(lt / 0.12), 3)).toFixed(4)})`;
+    $("#sweep").style.background = `conic-gradient(rgba(255,255,255,.24) ${a.toFixed(1)}deg, rgba(0,0,0,0) ${a.toFixed(1)}deg)`;
+    const z = 1 + 0.14 * ease.i3(prog(t, 1.1, 1.4)), wx = (hash(f * 1.9) - 0.5) * 4, wy = (hash(f * 2.9) - 0.5) * 4;
+    $("#ring").style.transform = `translate(${wx.toFixed(1)}px,${wy.toFixed(1)}px) scale(${z.toFixed(4)})`;
+    sc.leader.style.filter = `brightness(${(0.9 + hash(f * 1.7) * 0.2).toFixed(3)})`;
+    drawDust(f);
+  }
+  // iris: hero opens from the tally lamp
+  const ip = ease.i2(prog(t, T.iris[0], T.iris[1])), rad = ip * 2300, ring = $("#irisRing");
+  sc.hero.style.clipPath = t < T.iris[1] ? `circle(${rad.toFixed(1)}px at 540px 640px)` : "none";
+  ring.style.visibility = t >= T.iris[0] && t < T.iris[1] ? "visible" : "hidden";
+  ring.style.width = ring.style.height = (2 * rad).toFixed(1) + "px";
+  ring.style.transform = `translate(${(540 - rad).toFixed(1)}px,${(640 - rad).toFixed(1)}px)`;
+  ring.style.opacity = (1 - ip * 0.7).toFixed(3);
+
+  // hero camera: rack focus while AF hunts, push-in, whip pan
+  if (t >= T.iris[0] && t < 4.95) {
+    const blur = focusBlur(t), push = 1 + 0.1 * ease.i2(prog(t, 4.45, 4.8));
+    heroCam.style.transform = `scale(${((1 + blur * 0.003) * push).toFixed(4)})`;
+    heroCam.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : "none";
+    const fr = fig.getBoundingClientRect(), hr = sc.hero.getBoundingClientRect();
+    const face = { x: fr.left - hr.left + fr.width * FACE.cx, y: fr.top - hr.top + fr.height * FACE.cy, w: fr.width * FACE.w * 1.28, h: fr.height * FACE.h * 1.14 };
+    let box;
+    if (t < 2.56) box = AFP[0]; else if (t < 2.7) box = AFP[1]; else if (t < 2.84) box = AFP[2];
+    else { const q = ease.o3(prog(t, 2.84, 2.98)); box = { x: lerp(AFP[2].x, face.x, q), y: lerp(AFP[2].y, face.y, q), w: lerp(AFP[2].w, face.w, q), h: lerp(AFP[2].h, face.h, q) }; }
+    let pop = 1; for (const j of [2.4, 2.56, 2.7, T.lock]) if (t >= j && t < j + 0.1) pop = 1 + 0.16 * (1 - (t - j) / 0.1);
+    const w = box.w * pop, h = box.h * pop, lock = t >= T.lock;
+    af.style.visibility = t >= 2.4 ? "visible" : "hidden";
+    af.style.width = w.toFixed(1) + "px"; af.style.height = h.toFixed(1) + "px";
+    af.style.transform = `translate(${(box.x - w / 2).toFixed(1)}px,${(box.y - h / 2).toFixed(1)}px)`;
+    af.style.color = lock ? "#27D17C" : "#FFFFFF"; afLbl.textContent = lock ? "AF · FACE" : "AF";
+    $("#recDot").style.opacity = (t * 2) % 1 < 0.6 ? 1 : 0.15;
+    $("#recTc").textContent = tc(t - 2.28);
+    const beat = t < T.slam ? 0 : Math.exp(-(((t - T.slam) % 0.5) / 0.5) * 5);
+    $("#mL").style.transform = `scaleX(${(0.3 + 0.6 * beat + 0.1 * hash(f * 1.3)).toFixed(3)})`;
+    $("#mR").style.transform = `scaleX(${(0.28 + 0.6 * beat + 0.1 * hash(f * 2.1)).toFixed(3)})`;
+    if (t >= 3.18) scramble(nameEn, "LEE CHAEWON", prog(t, 3.18, 3.5), 11);
+  }
+  // whip pans and tune-ins between channels
+  const w1 = ease.io3(prog(t, T.whip1[0], T.whip1[1])), w2 = ease.io3(prog(t, T.whip2[0], T.whip2[1]));
+  sc.hero.style.transform = `translateX(${(-1080 * w1).toFixed(1)}px)`;
+  sc.static1.style.transform = `translateX(${(1080 * (1 - w1)).toFixed(1)}px)`;
+  sc.sportsM.style.transform = `translateX(${(-1080 * w2).toFixed(1)}px)`;
+  sc.static2.style.transform = `translateX(${(1080 * (1 - w2)).toFixed(1)}px)`;
+  const tune = (st, n, t0, ch) => {
+    if (!(t >= t0 - 0.2 && t < t0 + 0.9)) return;
+    noiseCv[st].style.opacity = (1 - prog(t, t0 + 0.38, t0 + 0.52)).toFixed(3);
+    if (t < t0 + 0.52) drawNoise(noiseCv[st], f, n);
+    const osd = $(`#${st} .osd`); osd.style.opacity = t < t0 ? 0 : (1 - prog(t, t0 + 0.6, t0 + 0.7)).toFixed(3);
+    $(".osdN", osd).textContent = t < t0 + 0.08 ? "CH 0_" : ch;
+  };
+  tune("static1", 1, 4.9, "CH 01"); tune("static2", 2, 8.4, "CH 02");
+  const hold = (t0) => { const u = prog(t, t0, t0 + 0.24); return u > 0 && u < 1 ? 70 * Math.sin(u * Math.PI * 4.5) * Math.pow(1 - u, 2) : 0; };
+  sc.sportsT.style.transform = `translateY(${hold(5.28).toFixed(1)}px)`;
+
+  // sports montage
+  if (t >= 6.36 && t < 8.43) {
+    setOdo(12000 * ease.o4(prog(t, T.odo[0], T.odo[1])));
+    $("#trk").style.transform = `translateX(${(-430 * (t - 6.4)).toFixed(1)}px)`;
+  }
+  // live: title card shrinks into monitor 1 of the multiview, then the wall zooms into PGM
+  if (t >= 8.8 && t < 11.47) {
+    const wx = wallXform(t);
+    wall.style.transform = `translate(${wx.tx.toFixed(2)}px,${wx.ty.toFixed(2)}px) scale(${wx.s.toFixed(4)})`;
+    const q = ease.io3(prog(t, T.shrink[0], T.shrink[1]));
+    if (q > 0) {
+      const k = Math.exp(lerp(0, Math.log((wx.s * TILE.w) / 1080), q)), x = lerp(0, WALLP.x + wx.tx, q), y = lerp(0, WALLP.y + wx.ty, q);
+      sc.liveT.style.transform = `translate(${x.toFixed(2)}px,${y.toFixed(2)}px) scale(${k.toFixed(5)})`;
+      sc.liveT.style.borderRadius = (10 / k).toFixed(1) + "px";
+    } else { sc.liveT.style.transform = `translateY(${hold(8.78).toFixed(1)}px)`; sc.liveT.style.borderRadius = "0"; }
+    sc.liveT.style.zIndex = t >= T.shrink[0] ? "5" : "";
+    tiles[0].classList.toggle("pgm", t >= T.shrink[1] && t < T.take);
+    tiles[5].classList.toggle("pvw", t >= 10.12 && t < T.take);
+    tiles[5].classList.toggle("pgm", t >= T.take);
+    $(".scr", tiles[5]).style.filter = t >= T.take ? `brightness(${(1 + 0.9 * Math.exp(-(t - T.take) / 0.06)).toFixed(3)})` : "none";
+    heartFrame(HL, t); heartFrame(HZ, t);
+    for (const b of BOKEH) b.el.style.transform = `translate(${(b.x + 24 * Math.sin(t * 1.3 + b.d)).toFixed(1)}px,${(b.y - b.sp * (t - 8.8)).toFixed(1)}px)`;
+  }
+  // swipe up to the prompter
+  const sw = ease.io3(prog(t, T.swipe[0], T.swipe[1]));
+  sc.liveW.style.transform = `translateY(${(-1920 * sw).toFixed(1)}px)`;
+  sc.prompt.style.transform = `translateY(${(1920 * (1 - sw)).toFixed(1)}px)`;
+  if (t >= 11.2 && t < 13.48) {
+    const n = T.lines.filter((x) => t >= x - 0.08).length;
+    $("#pcount").textContent = `0${Math.max(1, n)} / 05`;
+    $("#pfill").style.transform = `scaleX(${prog(t, T.lines[0], 13.35).toFixed(4)})`;
+  }
+  // press pass: falls on its lanyard, bounces and swings
+  if (t >= 13.22) {
+    const dp = prog(t, 13.42, T.land); let y, rot;
+    if (t < T.land) { y = -1500 * (1 - ease.i2(dp)); rot = -5 * (1 - dp); }
+    else { const u = t - T.land; y = 44 * Math.exp(-u / 0.09) * Math.sin((u / 0.2) * Math.PI * 2); rot = 3.2 * Math.exp(-u / 0.38) * Math.sin((u / 0.62) * Math.PI * 2); }
+    passWrap.style.transform = `translateY(${y.toFixed(1)}px) rotate(${rot.toFixed(3)}deg)`;
+    for (const s of SPK) {
+      const k = prog(t, s.t0, s.t0 + 0.42), on = k > 0 && k < 1;
+      s.el.style.visibility = on ? "visible" : "hidden";
+      if (on) s.el.style.transform = `translate(${s.x - 35}px,${s.y - 35}px) rotate(${(90 * k).toFixed(1)}deg) scale(${(s.s * 1.25 * Math.sin(Math.PI * k)).toFixed(3)})`;
+    }
+  }
+
+  // hud
+  hud.style.visibility = t >= T.slam ? "visible" : "hidden";
+  const off = t >= T.off; tally.classList.toggle("off", off);
+  $("#tallyTxt").textContent = off ? "Off Air" : "On Air";
+  $("#tallyDot").style.opacity = off ? 0.5 : ((t - T.slam) % 0.5) < 0.3 ? 1 : 0.25;
+  $("#hudTc").textContent = tc(3600 + Math.max(0, t - T.slam));
+
+  // screen: impact shakes + crt power-off
+  let dx = 0, dy = 0;
+  for (const [t0, d, a] of SHAKES) { const u = (t - t0) / d; if (u >= 0 && u < 1) { const m = a * (1 - u) * (1 - u); dx += m * Math.sin((t - t0) * 2 * Math.PI * 31 + t0); dy += m * Math.cos((t - t0) * 2 * Math.PI * 27 + t0 * 2); } }
+  const sy = 1 - 0.994 * ease.i3(prog(t, T.crt, T.crt + 0.14)), sx = 1 - 0.996 * ease.i3(prog(t, T.crt + 0.14, T.crt + 0.24)), br = 1 + 2.4 * prog(t, T.crt - 0.02, T.crt + 0.14);
+  screen.style.transform = `translate(${dx.toFixed(2)}px,${dy.toFixed(2)}px) scale(${sx.toFixed(4)},${sy.toFixed(4)})`;
+  screen.style.filter = br > 1.001 ? `brightness(${br.toFixed(3)})` : "none";
+  screen.style.opacity = (1 - prog(t, T.crt + 0.24, T.crt + 0.32)).toFixed(3);
+  const dk = prog(t, T.crt + 0.26, T.crt + 0.5); $("#dot").style.opacity = t >= T.crt + 0.22 ? (1 - dk).toFixed(3) : 0;
+  $("#dot").style.transform = `scale(${(1 - 0.7 * dk).toFixed(3)})`;
+
+  // flashes
+  let fl = t < T.slam ? 0.85 * ease.i2(prog(t, 1.3, T.slam)) : 0;
+  for (const [t0, a, d] of FLASHES) if (t >= t0) fl = Math.max(fl, a * Math.exp(-(t - t0) / d));
+  flash.style.opacity = fl.toFixed(3);
+  drawGrain(f);
+}
+
+// ───────── render hook ─────────
+window.SHORTS = {
+  fps: FPS, duration: DUR, width: 1080, height: 1920,
+  blur: [[1.4, 1.66, 6, 0.6], [1.78, 2.3, 4, 0.5], [3.04, 3.26, 6, 0.6], [4.7, 4.95, 8, 1], [6.38, 6.62, 6, 0.6], [6.83, 7.07, 6, 0.6], [7.23, 7.47, 6, 0.6],
+    [8.22, 8.43, 8, 1], [9.52, 9.84, 6, 0.6], [10.4, 10.9, 6, 0.6], [11.2, 11.47, 8, 1], [13.22, 13.72, 6, 0.6], [14.44, 14.72, 4, 0.5]],
+  glitch: [[0.4, 0.5, 1], [4.88, 4.96, 0.6], [5.3, 5.4, 0.45], [8.38, 8.44, 0.6], [8.78, 8.88, 0.45], [14.34, 14.44, 0.8]],
+  cues: { bpm: 120, grid0: T.slam, slam: T.slam, clap: 0.38, beeps: [0.5, 0.8, 1.1], af: [2.4, 2.56, 2.7], lock: T.lock, nameHit: T.nameHit, roles: [3.42, 4.0, 4.42],
+    static: [[4.86, 5.4], [8.36, 8.9]], whoosh: [1.76, 4.72, 6.36, 6.82, 7.22, 8.22, 9.52, 10.4, 11.2, 13.22], cards: T.cards, odo: T.odo,
+    flips: tiles.slice(1).map((_, i) => +(9.62 + (Math.floor((i + 1) / 4) + ((i + 1) % 4)) * 0.045 + hash((i + 1) * 1.3) * 0.02).toFixed(3)),
+    take: T.take, hearts: HZ.map((h) => +h.t0.toFixed(3)), lines: T.lines, shutter: T.shutter, land: T.land, sparkle: 13.92, off: T.off, crt: T.crt },
+};
+window.renderAt = (t) => { tl.seek(t); update(t); };
+(async () => {
+  await document.fonts.ready;
+  await Promise.all($$("img").map((i) => i.decode().catch(() => null)));
+  for (const el of $$(".fit")) { el.style.fontSize = "100px"; el.style.fontSize = ((100 * +el.dataset.w) / el.getBoundingClientRect().width).toFixed(2) + "px"; }
+  buildTimeline(); window.renderAt(0); window.SHORTS_READY = true;
+})();
+})();
+</script>
+</body>
+</html>
