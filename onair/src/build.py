@@ -78,7 +78,7 @@ COURSE = [
     dict(kind="cp", top="2025.10", right="", title="제106회 전국체육대회 리셉션", desc="진행 · 부산"),
     dict(kind="cp", top="2025.11", right="", title="우이런 · 북한산페스타", desc="메인 MC · 강북구 10km"),
     dict(kind="photo", img="ev_kolon.jpg", w=1206, h=804, alt="코오롱 트레일캠프 울릉 야간 무대에서 마이크를 들고 진행하는 이채원", cap="코오롱 트레일캠프 in 울릉 · 메인 MC", right="2026.06"),
-    dict(kind="cp", top="2026.10.11", right="NEXT", title="MBN 전국 나주 마라톤", desc="메인 MC · 예정"),
+    dict(kind="cp", top="2026.10.11", right="NEXT", title="MBN 전국 나주 마라톤", desc="메인 MC", when="2026-10-11"),
     dict(kind="flag", top="FINISH", right="42.195 KM", title="FINISH", desc="다음 출발선에서 만나요"),
 ]
 UPCOMING = [  # from her Instagram post of 2026-09-30
@@ -146,7 +146,7 @@ BRANDS_B = ["BMW M CLUB KOREA", "CRYPTO.COM", "SAMSUNG", "HYUNDAI", "EUCERIN", "
 MORE_AIR = ["LG 그램 전속 쇼호스트", "삼성전자 갤럭시 Z플립 · Z폴드 · 탭 런칭 방송", "리본카 자동차 라이브 고정 진행", "패션플러스", "롯데시네마 굿즈 라이브", "필립스", "정관장", "카카오쇼핑라이브", "하이마트 노트북 대전", "트로이아르케", "캐논", "유한양행", "브람스 안마의자"]
 ROLES = ["스포츠 아나운서", "라이브커머스 쇼호스트", "마라톤 · 그란폰도 메인 MC", "기업 · VIP 행사 MC", "방송 리포터"]
 CRAWL = [
-    ("NEXT", "10.10 강서 허준런 메인 MC"), ("NEXT", "10.11 MBN 전국 나주 마라톤 메인 MC"),
+    ("NEXT", "10.10 강서 허준런 메인 MC", "2026-10-10"), ("NEXT", "10.11 MBN 전국 나주 마라톤 메인 MC", "2026-10-11"),
     ("2026.09", "철원 DMZ 국제평화마라톤 개막 공식행사 MC · 12,000명"), ("2026.06", "KBS 뉴스 2026 월드컵 현장 인터뷰"),
     ("2026.06", "코오롱 트레일캠프 in 울릉 메인 MC"), ("LIVE", "네이버 쇼핑라이브 푸마 바디웨어 · 풀무원 · 아에르 · 오버더"),
     ("2026.01", "타린로즈 VIP 고객 초청행사 메인 MC"), ("2024—2026", "화천 DMZ 랠리 · 설악그란폰도 메인 MC"),
@@ -184,7 +184,15 @@ def vod_row(n, url, title, meta, kind, thumb=None, dur="", land=False):
 
 # ───────────────────────── sections ─────────────────────────
 def hero():
-    crawl = "".join(f'<span><em>{e(a)}</em>{e(b)}</span>' for a, b in CRAWL)
+    def crawl_item(item):
+        if len(item) == 3:  # (label, text, date): "NEXT" until the day passes, then the date itself
+            label, text, when = item
+            past = when[:4] + "." + when[5:7] + "." + when[8:]
+            text = text.split(" ", 1)[1] if text[:2].isdigit() else text
+            return f'<span><em data-when="{when}" data-future="NEXT {e(when[5:].replace("-", "."))}" data-past="{past}">NEXT {e(when[5:].replace("-", "."))}</em>{e(text)}</span>'
+        a, b = item
+        return f'<span><em>{e(a)}</em>{e(b)}</span>'
+    crawl = "".join(crawl_item(i) for i in CRAWL)
     return f'''
 <section class="hero" id="top" data-chapter="ON AIR">
   <canvas class="hero-gl" aria-hidden="true"></canvas>
@@ -329,9 +337,15 @@ def course():
             continue
         cpn += 1
         vid = (f'<a class="cp-vid mono" href="{e(c["video"])}" target="_blank" rel="noopener" data-cursor="영상 ↗">▶ 공식 영상 ↗</a>' if c.get("video") else "")
+        if c.get("when"):  # upcoming race: "· NEXT" / "· 예정" disappear once the day has passed
+            right = f'<span data-when="{c["when"]}" data-future=" · {e(c["right"])}" data-past=""> · {e(c["right"])}</span>'
+            soon = f'<span data-when="{c["when"]}" data-future=" · 예정" data-past=""> · 예정</span>'
+        else:
+            right = (" · " + e(c['right'])) if c['right'] else ""
+            soon = ""
         lis.append(f'''<li class="cp" data-name="CP {cpn:02d} · {e(c['title'])}"><i class="cp-dot"></i><i class="cp-stem"></i><div class="cp-card">
-          <div class="cp-top mono"><b>CP {cpn:02d}</b><span>{e(c['top'])}{(" · " + e(c['right'])) if c['right'] else ""}</span></div>
-          <h3>{e(c['title'])}</h3><p>{e(c['desc'])}</p>{vid}</div></li>''')
+          <div class="cp-top mono"><b>CP {cpn:02d}</b><span>{e(c['top'])}{right}</span></div>
+          <h3>{e(c['title'])}</h3><p>{e(c['desc'])}{soon}</p>{vid}</div></li>''')
     up = "".join(f'<li data-date="{d}"><span class="mono up-d">{d[5:].replace("-", ".")}</span><b>{e(n)}</b><span class="mono up-state">메인 MC</span></li>' for d, n in UPCOMING)
     press = "".join(f'<li><a href="{e(u)}" target="_blank" rel="noopener" data-cursor="기사 ↗"><span class="mono">{e(s)}</span><b>{e(t)}</b><i aria-hidden="true">↗</i></a></li>' for s, t, u in PRESS)
     return f'''
@@ -670,7 +684,11 @@ def main():
           f'<meta property="og:image" content="{site}assets/img/og.jpg">\n'
           '<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n'
           '<meta name="twitter:card" content="summary_large_image">\n'
-          '<meta name="theme-color" content="#FE8AAD">')
+          '<meta name="theme-color" content="#FE8AAD">\n'
+          '<link rel="icon" href="assets/favicon/favicon.svg" type="image/svg+xml">\n'
+          '<link rel="icon" href="assets/favicon/favicon-32.png" sizes="32x32" type="image/png">\n'
+          '<link rel="icon" href="assets/favicon/favicon.ico" sizes="16x16 32x32 48x48">\n'
+          '<link rel="apple-touch-icon" href="assets/favicon/apple-touch-icon.png">')
     full = ("<!doctype html>\n<html lang=\"ko\">\n<head>\n<meta charset=\"utf-8\">\n"
             "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,viewport-fit=cover\">\n"
             f"{title}\n{og}\n<style>\n{faces}\n{css}\n</style>\n</head>\n<body>\n{body}\n{scripts}\n</body>\n</html>\n")
@@ -681,6 +699,7 @@ def main():
     (docs / "index.html").write_text(full)
     (docs / ".nojekyll").write_text("")
     used = set(re.findall(r'assets/[\w\-./]+\.(?:jpg|jpeg|png|webp)', body)) | {"assets/img/og.jpg"}
+    used |= {f"assets/favicon/{n}" for n in ("favicon.svg", "favicon-32.png", "favicon-16.png", "favicon.ico", "apple-touch-icon.png", "icon-512.png")}
     for u in sorted(used):
         src = ROOT / u
         if src.exists():

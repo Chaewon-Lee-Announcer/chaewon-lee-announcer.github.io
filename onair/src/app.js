@@ -47,6 +47,15 @@
     requestAnimationFrame(tick);
   })();
 
+  /* ── date-aware labels: [data-when] shows data-future up to and including that day, data-past afterwards ── */
+  (() => {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    for (const el of $$("[data-when]")) {
+      const past = new Date(el.dataset.when + "T00:00:00") < today;
+      el.textContent = past ? el.dataset.past : el.dataset.future;
+    }
+  })();
+
   /* ── next race countdown (from the published schedule) ── */
   (() => {
     const items = $$(".upnext li"); if (!items.length) return;
@@ -222,21 +231,32 @@
       .from(".crawl", { yPercent: 100, duration: 0.8 }, 0.55);
     if (SCRAMBLE && kick) heroIntro.set(kick, { textContent: "" }, 0).to(kick, { duration: 1.3, scrambleText: { text: kickText, chars: "ONAIR·0123456789", speed: 0.5 } }, 0.4);
 
-    // autofocus reticle rests on her face; on desktop it follows the pointer and re-locks when idle
-    const focus = $(".vf-focus"), vf = $(".vf");
-    const faceXY = () => {
-      const img = $(".hero-cut").getBoundingClientRect(), v = vf.getBoundingClientRect();
-      return { x: img.left - v.left + img.width * 0.43 - focus.offsetWidth / 2, y: img.top - v.top + img.height * 0.085 - focus.offsetHeight / 2 };
+    // autofocus: follows the face detected in the cutout (YuNet bbox, as fractions of the image box) every frame,
+    // unless the pointer is steering it; turns green only once it has settled on the face
+    const focus = $(".vf-focus"), vf = $(".vf"), cut = $(".hero-cut");
+    const FACE = { cx: 0.4341, cy: 0.1597, w: 0.3871, h: 0.1649 };
+    const faceBox = () => {
+      const r = cut.getBoundingClientRect(), v = vf.getBoundingClientRect();
+      const w = Math.max(64, r.width * FACE.w * 1.22), h = Math.max(64, r.height * FACE.h * 1.1);
+      return { x: r.left - v.left + r.width * FACE.cx - w / 2, y: r.top - v.top + r.height * FACE.cy - h / 2, w, h };
     };
-    G.set(focus, faceXY()); focus.classList.add("lock");
-    addEventListener("resize", () => { if (focus.classList.contains("lock")) G.set(focus, faceXY()); });
+    let mode = "face", pointer = { x: 0, y: 0 }, heroOn = true;
+    const t0 = faceBox();
+    const af = { x: t0.x - t0.w * 0.3, y: t0.y - t0.h * 0.3, w: t0.w * 1.6, h: t0.h * 1.6 };
+    new IntersectionObserver(([en]) => { heroOn = en.isIntersecting; }).observe(heroSec);
+    G.ticker.add(() => {
+      if (!heroOn) return;
+      const t = mode === "face" ? faceBox() : { x: pointer.x - 59, y: pointer.y - 59, w: 118, h: 118 };
+      const k = mode === "face" ? 0.14 : 0.24;
+      af.x += (t.x - af.x) * k; af.y += (t.y - af.y) * k; af.w += (t.w - af.w) * k; af.h += (t.h - af.h) * k;
+      G.set(focus, { x: af.x, y: af.y, width: af.w, height: af.h });
+      focus.classList.toggle("lock", mode === "face" && Math.abs(t.x - af.x) < 2.5 && Math.abs(t.y - af.y) < 2.5 && Math.abs(t.w - af.w) < 2.5);
+    });
 
-    // pointer: depth parallax + studio key light
+    // pointer: depth parallax + studio key light + manual focus
     if (FINE) {
       const q = (t, p) => G.quickTo(t, p, { duration: 0.9, ease: "power3" });
       const wx = q(".hero-word", "x"), wy = q(".hero-word", "y"), fx = q(".hero-fig", "x"), fy = q(".hero-fig", "y"), vx = q(".vf", "x"), vy = q(".vf", "y");
-      const ffx = G.quickTo(focus, "x", { duration: 0.55, ease: "power3" }), ffy = G.quickTo(focus, "y", { duration: 0.55, ease: "power3" });
-      const faceLock = () => { const p = faceXY(); ffx(p.x); ffy(p.y); focus.classList.add("lock"); };
       let idle;
       heroSec.addEventListener("pointermove", (e) => {
         const r = heroSec.getBoundingClientRect();
@@ -244,10 +264,10 @@
         wx(nx * -34); wy(ny * -18); fx(nx * 20); fy(ny * 8); vx(nx * -6); vy(ny * -4);
         glMouse && glMouse(nx + 0.5, 0.5 - ny);
         const v = vf.getBoundingClientRect();
-        ffx(e.clientX - v.left - focus.offsetWidth / 2); ffy(e.clientY - v.top - focus.offsetHeight / 2); focus.classList.remove("lock");
-        clearTimeout(idle); idle = setTimeout(faceLock, 1600);
+        pointer = { x: e.clientX - v.left, y: e.clientY - v.top }; mode = "pointer";
+        clearTimeout(idle); idle = setTimeout(() => { mode = "face"; }, 1400);
       });
-      heroSec.addEventListener("pointerleave", () => { clearTimeout(idle); faceLock(); });
+      heroSec.addEventListener("pointerleave", () => { clearTimeout(idle); mode = "face"; });
     }
 
     // audio meters dance while the hero is on screen
@@ -789,10 +809,6 @@
 
   /* ── start: cold open → hero intro ── */
   function coldOpen(done) {
-    let seen = false;
-    try { seen = sessionStorage.getItem("onair-cold") === "1"; } catch (_) {}
-    if (seen) { done(); return; }
-    try { sessionStorage.setItem("onair-cold", "1"); } catch (_) {}
     const top = ["#C0C0C0", "#C0C000", "#00C0C0", "#00C000", "#C000C0", "#C00000", "#0000C0"];
     const mid = ["#0000C0", "#131313", "#C000C0", "#131313", "#00C0C0", "#131313", "#C0C0C0"];
     const bot = ["#00214C", "#FFFFFF", "#32006A", "#131313", "#090909", "#131313", "#1D1D1D", "#131313"];

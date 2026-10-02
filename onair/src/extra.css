@@ -102,3 +102,5 @@
 html.has-cursor .cursor{display:block}
 .cp-vid{justify-self:start;margin-top:6px;color:var(--tally);text-decoration:none}
 .cp-vid:hover{text-decoration:underline}
+.vf-focus{transition:none}
+.vf-focus::before{transition:border-color .25s}

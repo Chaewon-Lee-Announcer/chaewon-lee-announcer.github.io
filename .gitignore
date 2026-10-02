@@ -5,3 +5,5 @@
 # local build caches
 __pycache__/
 onair/src/.fontcache/
+# shorts render output (video files)
+onair/shorts/out/
