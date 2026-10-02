@@ -661,7 +661,7 @@ def main():
     title = "<title>이채원 ON AIR</title>\n<meta name=\"description\" content=\"스포츠 아나운서 · 라이브커머스 쇼호스트 이채원의 방송 콘셉트 포트폴리오\">"
     page = f"{title}\n<style>\n{faces}\n{css}\n</style>\n{body}\n{scripts}\n"
     (ROOT / "index.html").write_text(page)
-    site = "https://uygnoey.github.io/chaewon.lee.portfolio/"
+    site = "https://yeongyu.me/chaewon.lee.portfolio/"
     og = (f'<link rel="canonical" href="{site}">\n'
           '<meta property="og:type" content="website">\n'
           '<meta property="og:title" content="이채원 ON AIR — 스포츠 아나운서 · 라이브커머스 쇼호스트">\n'
