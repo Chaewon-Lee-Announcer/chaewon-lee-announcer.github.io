@@ -111,3 +111,5 @@ html.has-cursor .cursor{display:block}
 .cp-vid:hover{text-decoration:underline}
 .vf-focus{transition:none}
 .vf-focus::before{transition:border-color .25s}
+/* nothing inside the programme may widen the page (a 12px hero overhang made mobile Chrome zoom the whole page out) */
+main{overflow-x:clip}
