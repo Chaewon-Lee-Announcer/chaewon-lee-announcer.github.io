@@ -1399,8 +1399,15 @@ main{overflow-x:clip}
   const SCRAMBLE = HAS && !!window.ScrambleTextPlugin;
   const FLIP = HAS && !!window.Flip;
   root.classList.add("js");
+  /* ── a reload always starts the programme from the top: no restored scroll position (a shared #link still opens at its section) ── */
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  const navEntry = performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
+  if (navEntry && navEntry.type === "reload" && location.hash) history.replaceState(null, "", location.pathname + location.search);
+  const toTop = () => { if (!location.hash) window.scrollTo(0, 0); };
+  toTop(); addEventListener("load", toTop);
   if (HAS) {
     G.registerPlugin(ST);
+    ST.clearScrollMemory("manual");
     if (SCRAMBLE) G.registerPlugin(window.ScrambleTextPlugin);
     if (FLIP) G.registerPlugin(window.Flip);
   }
@@ -1497,6 +1504,7 @@ main{overflow-x:clip}
     lenis.on("scroll", ST.update);
     G.ticker.add((t) => lenis.raf(t * 1000));
     G.ticker.lagSmoothing(0);
+    if (!location.hash) lenis.scrollTo(0, { immediate: true });
   }
   if (location.protocol === "file:") window.__onair = { lenis, ST, G }; // local QA hook only
   const scrollToEl = (el) => {
