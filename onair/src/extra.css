@@ -121,3 +121,9 @@ main{overflow-x:clip}
 .gauge-gear{left:50%;right:auto;top:auto;bottom:5%;transform:translateX(-50%)}
 /* the viewfinder centre mark would land on the hero copy on narrow screens */
 @media (max-width:900px){.vf-cross{display:none}}
+
+/* mobile RACE DAY HUD stays on one line inside the screen */
+.course:not(.h) .course-hud{flex-wrap:nowrap;white-space:nowrap}
+.course:not(.h) .course-hud .cp-now{min-width:0;overflow:hidden;text-overflow:ellipsis}
+/* short phone screens (browser toolbars showing): the record board fits whole under the top bar */
+@media (max-width:640px) and (max-height:620px){.board-grid{margin-block:12px}.stat{padding:13px 14px;gap:8px}.odo{font-size:46px}}
