@@ -785,6 +785,14 @@ html.has-cursor .cursor{display:block}
 /* nothing inside the programme may widen the page (a 12px hero overhang made mobile Chrome zoom the whole page out) */
 main{overflow-x:clip}
 
+/* the press pass drops in behind the PRESS PASS heading, never over it */
+.profile-side .seg-head{position:relative;z-index:2}
+.pass-wrap{z-index:1}
+/* gear indicator sits in the empty lower sector of the dial, clear of the 7 and 8 marks */
+.gauge-gear{left:50%;right:auto;top:auto;bottom:5%;transform:translateX(-50%)}
+/* the viewfinder centre mark would land on the hero copy on narrow screens */
+@media (max-width:900px){.vf-cross{display:none}}
+
 </style>
 </head>
 <body>
@@ -1507,9 +1515,77 @@ main{overflow-x:clip}
     if (!location.hash) lenis.scrollTo(0, { immediate: true });
   }
   if (location.protocol === "file:") window.__onair = { lenis, ST, G }; // local QA hook only
+  /* ── steppers: pinned motion sections advance ONE step per scroll gesture (wheel flick, swipe or key), so a fast
+        scroll can't skip them; the gesture after the last step (or before the first) hands the page back ── */
+  let activeStep = null, navUntil = 0, engagedAt = 0, lastWheel = 0, lastMag = 0, touchY = null, touchT = 0;
+  const lockScroll = (on) => { if (lenis) { if (on) lenis.stop(); else lenis.start(); } else root.style.overflow = on ? "hidden" : ""; };
+  const holdAt = (y) => { if (lenis) lenis.scrollTo(y, { immediate: true, force: true }); else window.scrollTo(0, y); };
+  const releaseSteppers = () => { if (activeStep) activeStep.release(0); };
+  function stepper({ trigger, start = "top top", count, show }) {
+    let cur = 0, busy = false, hold = 0, st = null;
+    const unbusy = (d) => G.delayedCall(Math.max(0.2, d || 0), () => { busy = false; });
+    const self = {
+      cur: () => cur,
+      holdY: () => hold,
+      engage(dir) {
+        if (activeStep === self || performance.now() < navUntil) return;
+        // only when the reader actually arrived here — a jump that merely crossed the section (Home key, a big programmatic scroll) must not be pulled back
+        const y = window.scrollY; if (y < st.start - 80 || y > st.end + 80) return;
+        releaseSteppers();
+        activeStep = self; engagedAt = performance.now(); hold = Math.round(dir > 0 ? st.start : st.end) + (dir > 0 ? 1 : -1);
+        lockScroll(true); holdAt(hold);
+        cur = dir > 0 ? 0 : count - 1; busy = true; unbusy(show(cur, dir, true));
+      },
+      go(dir) {
+        if (busy || activeStep !== self) return;
+        const next = cur + dir;
+        if (next < 0 || next >= count) return self.release(dir);
+        cur = next; busy = true; unbusy(show(cur, dir, false));
+      },
+      release(dir) {
+        if (activeStep !== self) return;
+        activeStep = null; lockScroll(false);
+        if (!dir) return;
+        const y = dir > 0 ? Math.round(st.end) + 2 : Math.round(st.start) - 2;
+        if (lenis) lenis.scrollTo(y, { duration: 0.7 }); else window.scrollTo({ top: y, behavior: "smooth" });
+      },
+      kill() { if (activeStep === self) self.release(0); st && st.kill(); },
+    };
+    st = ST.create({ trigger, start, end: () => "+=" + Math.round(window.innerHeight * 0.6), pin: true, invalidateOnRefresh: true,
+      onEnter: () => self.engage(1), onEnterBack: () => self.engage(-1) });
+    return self;
+  }
+  addEventListener("wheel", (e) => {
+    if (!activeStep) return;
+    e.preventDefault();
+    const t = performance.now(), gap = t - lastWheel, d = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX, m = Math.abs(d);
+    lastWheel = t;
+    // a new gesture = first event after a pause, or a clearly harder push while momentum is still decaying
+    const fresh = gap > 220 || m > lastMag * 1.8 + 12; lastMag = m;
+    if (m >= 3 && fresh && t - engagedAt > 120) activeStep.go(d > 0 ? 1 : -1);
+  }, { passive: false });
+  addEventListener("touchstart", (e) => { touchY = e.touches[0].clientY; touchT = performance.now(); }, { passive: true });
+  addEventListener("touchmove", (e) => { if (activeStep && e.cancelable) e.preventDefault(); }, { passive: false });
+  addEventListener("touchend", (e) => {
+    if (!activeStep || touchY == null || touchT < engagedAt) return;   // a swipe that began before the section locked doesn't count
+    const dy = touchY - e.changedTouches[0].clientY; touchY = null;
+    if (Math.abs(dy) > 36) activeStep.go(dy > 0 ? 1 : -1);
+  }, { passive: true });
+  addEventListener("keydown", (e) => {
+    if (!activeStep || e.altKey || e.metaKey || e.ctrlKey) return;
+    const k = e.key;
+    if (k === "ArrowDown" || k === "PageDown" || k === " " || k === "ArrowRight") { e.preventDefault(); activeStep.go(1); }
+    else if (k === "ArrowUp" || k === "PageUp" || k === "ArrowLeft") { e.preventDefault(); activeStep.go(-1); }
+    else if (k === "Escape" || k === "Home" || k === "End") releaseSteppers();
+  });
+  if (window.__onair) window.__onair.step = () => (activeStep ? { cur: activeStep.cur(), hold: activeStep.holdY() } : null); // local QA hook only
+  // a scrollbar drag or any other jump far from the hold point lets the stepper go
+  addEventListener("scroll", () => { if (activeStep && Math.abs(window.scrollY - activeStep.holdY()) > 260) releaseSteppers(); }, { passive: true });
+
   const scrollToEl = (el) => {
     if (!el) return;
-    if (lenis) lenis.scrollTo(el, { duration: 1.5 });
+    releaseSteppers(); navUntil = performance.now() + 1900;
+    if (lenis) lenis.scrollTo(el, { duration: 1.5, onComplete: () => { navUntil = 0; } });
     else el.scrollIntoView({ behavior: RM ? "auto" : "smooth" });
   };
   document.addEventListener("click", (e) => {
@@ -1685,18 +1761,18 @@ main{overflow-x:clip}
 
   /* ── marquees: hero crawl + brand wall, steered by scroll velocity ── */
   const marquees = [];
-  function marquee(track, dirSign, pxPerSec) {
+  function marquee(track, dirSign, pxPerSec, steer = true) {
     track.innerHTML += track.innerHTML;
     $$(":scope > *", track).slice(track.children.length / 2).forEach((n) => n.setAttribute("aria-hidden", "true"));
     if (!MOTION) return;
     const from = dirSign < 0 ? 0 : -50, to = dirSign < 0 ? -50 : 0;
     const tw = G.fromTo(track, { xPercent: from }, { xPercent: to, duration: Math.max(8, track.scrollWidth / 2 / pxPerSec), ease: "none", repeat: -1 });
-    const m = { tw, boost: 1, dir: 1 };
+    const m = { tw, boost: 1, dir: 1, steer };
     marquees.push(m);
     track.addEventListener("pointerenter", () => { m.hover = true; });
     track.addEventListener("pointerleave", () => { m.hover = false; });
   }
-  const crawl = $(".crawl-track"); if (crawl) marquee(crawl, -1, 70);
+  const crawl = $(".crawl-track"); if (crawl) marquee(crawl, -1, 70, false);
   $$(".js-mq").forEach((mq) => marquee(mq, +mq.dataset.dir || -1, 60));
   if (MOTION && marquees.length) {
     let vel = 0;
@@ -1705,8 +1781,8 @@ main{overflow-x:clip}
       vel *= 0.92;
       const dir = vel < -5 ? -1 : 1;
       for (const m of marquees) {
-        if (Math.abs(vel) > 5) m.dir = dir;
-        const target = m.hover ? 0.15 : m.dir * (1 + Math.min(Math.abs(vel) / 260, 5));
+        if (m.steer && Math.abs(vel) > 5) m.dir = dir;
+        const target = m.hover ? 0.15 : m.steer ? m.dir * (1 + Math.min(Math.abs(vel) / 700, 1)) : 1;
         m.boost = lerp(m.boost, target, 0.08);
         m.tw.timeScale(m.boost);
       }
@@ -1925,10 +2001,16 @@ main{overflow-x:clip}
       track.append(b);
     });
   }
+  // the scrubber never sits on top of what is being read: it hides while the page moves down, and comes back when
+  // scrolling up, with the pointer at the foot of the screen, or at the very end of the programme
+  let lastY = window.scrollY, goingDown = false, pointerLow = false;
+  const scrubAway = () => { const y = window.scrollY, max = ST.maxScroll(window) || 1; return y < window.innerHeight * 0.55 || (goingDown && !pointerLow && y < max - 40); };
+  if (FINE && scrub) addEventListener("mousemove", (e) => { const low = e.clientY > window.innerHeight - 96; if (low !== pointerLow) { pointerLow = low; scrub.classList.toggle("is-away", scrubAway()); } }, { passive: true });
   function onScroll() {
     if (!scrub) return;
     const max = ST.maxScroll(window) || 1, p = clamp(window.scrollY / max, 0, 1);
-    scrub.classList.toggle("is-away", window.scrollY < window.innerHeight * 0.55);
+    const dy = window.scrollY - lastY; lastY = window.scrollY; if (Math.abs(dy) > 4) goingDown = dy > 0;
+    scrub.classList.toggle("is-away", scrubAway());
     $(".scrub-track", scrub).style.setProperty("--p", (p * 100).toFixed(2) + "%");
     let idx = 0; const line = window.innerHeight * 0.45;
     chapters.forEach((s, i) => { if (s.getBoundingClientRect().top <= line) idx = i; });
@@ -1940,7 +2022,8 @@ main{overflow-x:clip}
   if (scrub) {
     $(".scrub-track", scrub).addEventListener("click", (e) => {
       const r = e.currentTarget.getBoundingClientRect(); const y = clamp((e.clientX - r.left) / r.width, 0, 1) * ST.maxScroll(window);
-      if (lenis) lenis.scrollTo(y, { duration: 1.4 }); else window.scrollTo({ top: y, behavior: RM ? "auto" : "smooth" });
+      releaseSteppers(); navUntil = performance.now() + 1800;
+      if (lenis) lenis.scrollTo(y, { duration: 1.4, onComplete: () => { navUntil = 0; } }); else window.scrollTo({ top: y, behavior: RM ? "auto" : "smooth" });
     });
     ST.addEventListener("refresh", () => { chapterMarks(); onScroll(); });
     if (lenis) lenis.on("scroll", onScroll); else addEventListener("scroll", onScroll, { passive: true });
@@ -1976,27 +2059,23 @@ main{overflow-x:clip}
       const count = $(".js-pd-count", sec), bar = $(".pd-bar i", sec), n = lines.length;
       let cur = -1;
       const setActive = (i) => { if (i === cur) return; cur = i; lines.forEach((l, k) => l.classList.toggle("on", k === i)); count.textContent = `${pad(i + 1)} / ${pad(n)}`; };
-      if (desktop) {
-        sec.classList.add("live");
-        let offs = [];
-        const measure = () => { offs = lines.map((l) => l.offsetTop + l.offsetHeight / 2); };
-        const render = (p) => {
-          if (!offs.length) measure();
-          const f = p * (n - 1), i = Math.floor(f), t = f - i;
-          const c = lerp(offs[i], offs[Math.min(i + 1, n - 1)], t);
-          G.set(box, { y: win.clientHeight / 2 - c });
-          setActive(Math.round(f)); bar.style.width = (p * 100).toFixed(1) + "%";
-        };
-        const proxy = { p: 0 };
-        G.to(proxy, { p: 1, ease: "none", onUpdate: () => render(proxy.p),
-          scrollTrigger: { trigger: pd, start: "center center", end: () => "+=" + Math.round(n * window.innerHeight * 0.42), pin: true, scrub: 0.6, invalidateOnRefresh: true, onRefresh: () => { measure(); render(proxy.p); } } });
-        measure(); render(0);
-        cleanups.push(() => { sec.classList.remove("live"); G.set(box, { clearProps: "transform" }); lines.forEach((l) => l.classList.remove("on")); });
-      } else {
-        sec.classList.add("stack");
-        lines.forEach((l, i) => ST.create({ trigger: l, start: "top 62%", end: "bottom 38%", onToggle: (s) => s.isActive && setActive(i) }));
-        cleanups.push(() => { sec.classList.remove("stack"); lines.forEach((l) => l.classList.remove("on")); });
-      }
+      // the prompter holds the page and reads one line per scroll gesture
+      sec.classList.add("live");
+      let offs = [];
+      const measure = () => { offs = lines.map((l) => l.offsetTop + l.offsetHeight / 2); };
+      const show = (i, dir, enter) => {
+        if (!offs.length) measure();
+        setActive(i); bar.style.width = (n > 1 ? (i / (n - 1)) * 100 : 100).toFixed(1) + "%";
+        const y = win.clientHeight / 2 - offs[i];
+        if (enter) { G.set(box, { y }); return 0.25; }
+        G.to(box, { y, duration: 0.6, ease: "power3.inOut", overwrite: true });
+        return 0.62;
+      };
+      measure(); show(0, 1, true);
+      const onRefresh = () => { measure(); G.set(box, { y: win.clientHeight / 2 - offs[Math.max(0, cur)] }); };
+      ST.addEventListener("refresh", onRefresh);
+      const stp = stepper({ trigger: pd, start: "center center", count: n, show });
+      cleanups.push(() => { stp.kill(); ST.removeEventListener("refresh", onRefresh); sec.classList.remove("live"); G.set(box, { clearProps: "transform" }); lines.forEach((l) => l.classList.remove("on")); });
     })();
 
     // PROFILE
@@ -2033,8 +2112,15 @@ main{overflow-x:clip}
         .from(chars, { yPercent: 115, "--w": 100, duration: 1.1, stagger: 0.04 }, 0.6)
         .from($(".ident-sub", sec), { autoAlpha: 0, y: 24, duration: 0.9 }, 1.0);
       if (desktop) {
-        ST.create({ animation: tl, trigger: sec, start: "top top", end: "+=110%", pin: true, scrub: 0.6,
-          onUpdate: () => setRun(G.getProperty(cvs, "opacity") > 0.02), onToggle: (s) => setRun(s.isActive && G.getProperty(cvs, "opacity") > 0.02) });
+        tl.pause(0); G.set(cvs, { opacity: 1 });
+        ST.create({ trigger: sec, start: "top bottom", end: "bottom top",
+          onToggle: (s) => setRun(s.isActive && tl.progress() < 0.3),
+          onLeaveBack: () => { tl.pause(0); G.set(cvs, { opacity: 1 }); } });
+        const stp = stepper({ trigger: sec, start: "top top", count: 1, show: (i, dir) => {
+          if (dir > 0) { setRun(true); tl.play(0).then(() => setRun(false)); return tl.duration(); }
+          tl.progress(1); return 0.2;
+        } });
+        cleanups.push(() => stp.kill());
       } else {
         tl.pause(0);
         ST.create({ trigger: sec, start: "top 70%", once: true, onEnter: () => { setRun(true); tl.play(0).then(() => setRun(false)); } });
@@ -2081,18 +2167,25 @@ main{overflow-x:clip}
           // the "you are here" point travels from screen-centre at the start to the FINISH dot at the end of the pin,
           // so the last checkpoint is always reached and the counter lands on exactly 42.195
           const d = dist(), tr = d ? Math.min(1, Math.max(0, -G.getProperty(track, "x") / d)) : 1, t = tr > 0.995 ? 1 : tr;
-          const c0 = window.innerWidth * 0.5, c1 = centers.length ? centers[centers.length - 1].x : c0;
+          const c0 = centers.length ? centers[0].x : window.innerWidth * 0.5, c1 = centers.length ? centers[centers.length - 1].x : c0;
           const cx = c0 + (c1 - c0) * t;
           const l = t >= 1 ? len : lenAtX(cx); path.style.strokeDashoffset = len - l;
           const p = path.getPointAtLength(l); G.set(runner, { x: p.x, y: p.y });
-          const km = (l / len) * 42.195; kmEl.textContent = km.toFixed(3); runner.dataset.km = km.toFixed(1) + " KM";
+          const l0 = centers.length ? lenAtX(c0) : 0, km = t >= 1 ? 42.195 : Math.max(0, (l - l0) / Math.max(1, len - l0)) * 42.195; kmEl.textContent = km.toFixed(3); runner.dataset.km = km.toFixed(1) + " KM";
           let name = "START LINE";
           for (const c of centers) { const hit = c.x <= cx + 2 || t >= 1; c.cp.classList.toggle("hit", hit); if (hit && c.cp.dataset.name) name = c.cp.dataset.name; }
           nowEl.textContent = name;
         };
         build();
-        G.to(track, { x: () => -dist(), ease: "none", onUpdate: render,
-          scrollTrigger: { trigger: pin, start: "top top", end: () => "+=" + dist(), pin: true, scrub: 0.8, invalidateOnRefresh: true, onRefreshInit: build, onRefresh: render } });
+        const STOPS = 8, stopX = (k) => -dist() * (k / (STOPS - 1));
+        const stp = stepper({ trigger: pin, start: "top top", count: STOPS, show: (k, dir, enter) => {
+          if (enter) { G.set(track, { x: stopX(k) }); render(); return 0.25; }
+          G.to(track, { x: stopX(k), duration: 0.95, ease: "power2.inOut", overwrite: true, onUpdate: render });
+          return 1.0;
+        } });
+        const reInit = () => build(), reDone = () => { G.set(track, { x: stopX(stp.cur()) }); render(); };
+        ST.addEventListener("refreshInit", reInit); ST.addEventListener("refresh", reDone);
+        cleanups.push(() => { stp.kill(); ST.removeEventListener("refreshInit", reInit); ST.removeEventListener("refresh", reDone); });
         G.from($$(".cp-card", sec), { autoAlpha: 0, y: (i) => (i % 2 ? 40 : -40), duration: 0.8, stagger: 0.03, ease: "power3.out", scrollTrigger: { trigger: pin, start: "top 70%", once: true } });
         render();
         cleanups.push(() => { sec.classList.remove("h"); cps.forEach((c) => c.classList.remove("hit")); G.set(track, { clearProps: "transform" }); });
@@ -2125,13 +2218,14 @@ main{overflow-x:clip}
       segHead(sec);
       if (gauge) {
         const st = { v: 0.8, kmh: 0 }; const speed = $(".js-speed"), gear = $(".js-gear");
-        G.fromTo(st, { v: 0.8, kmh: 0 }, { v: 7.15, kmh: 120, ease: "power2.in",
+        const rev = G.fromTo(st, { v: 0.8, kmh: 0 }, { v: 7.15, kmh: 120, ease: "power2.in",
           onUpdate: () => {
             const shake = st.v > 6.7 ? Math.sin(performance.now() / 38) * 1.4 : 0;
             G.set(gauge.needle, { rotation: gauge.ang(st.v) + shake, svgOrigin: "200 200" });
             speed.textContent = Math.round(st.kmh); gear.textContent = st.kmh < 4 ? "N" : String(Math.min(6, 1 + Math.floor(st.kmh / 21)));
           },
-          scrollTrigger: { trigger: $(".gauge", sec), start: "top 80%", end: "bottom 35%", scrub: 0.6 } });
+          duration: 2.2, paused: true });
+        ST.create({ trigger: $(".gauge", sec), start: "top 75%", onEnter: () => rev.play(0), onLeaveBack: () => rev.pause(0) });
       }
       G.from($(".quote-cap", sec), { autoAlpha: 0, y: 30, duration: 0.9, ease: "power3.out", scrollTrigger: { trigger: $(".quote-cap", sec), start: "top 90%", once: true } });
       G.from($$(".pit-list li", sec), { autoAlpha: 0, x: 30, duration: 0.6, stagger: 0.08, ease: "power3.out", scrollTrigger: { trigger: $(".pit-list", sec), start: "top 88%", once: true } });
@@ -2183,10 +2277,11 @@ main{overflow-x:clip}
       const list = $(".sheet-list", sec), rows = $$(".sheet-row", sec), now = $(".sheet-now", sec);
       G.from(rows, { autoAlpha: 0, x: -24, duration: 0.6, stagger: 0.06, ease: "power3.out", scrollTrigger: { trigger: list, start: "top 85%", once: true } });
       let idx = -1;
+      G.set(now, { y: list.offsetTop + rows[0].offsetTop });
       ST.create({ trigger: list, start: "top 62%", end: "bottom 62%", onUpdate: (s) => {
-        G.set(now, { y: list.offsetTop + s.progress * list.offsetHeight });
         const i = Math.min(rows.length - 1, Math.floor(s.progress * rows.length));
         if (i === idx) return; idx = i;
+        G.to(now, { y: list.offsetTop + rows[i].offsetTop, duration: 0.35, ease: "power3.out", overwrite: true });
         rows.forEach((r, k) => r.classList.toggle("on", k === i));
         const it = $(".r-item", rows[i]);
         if (SCRAMBLE && it) G.to(it, { duration: 0.8, scrambleText: { text: it.dataset.text, chars: KO, speed: 0.9 } });

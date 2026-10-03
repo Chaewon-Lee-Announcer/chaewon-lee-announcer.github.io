@@ -113,3 +113,11 @@ html.has-cursor .cursor{display:block}
 .vf-focus::before{transition:border-color .25s}
 /* nothing inside the programme may widen the page (a 12px hero overhang made mobile Chrome zoom the whole page out) */
 main{overflow-x:clip}
+
+/* the press pass drops in behind the PRESS PASS heading, never over it */
+.profile-side .seg-head{position:relative;z-index:2}
+.pass-wrap{z-index:1}
+/* gear indicator sits in the empty lower sector of the dial, clear of the 7 and 8 marks */
+.gauge-gear{left:50%;right:auto;top:auto;bottom:5%;transform:translateX(-50%)}
+/* the viewfinder centre mark would land on the hero copy on narrow screens */
+@media (max-width:900px){.vf-cross{display:none}}
